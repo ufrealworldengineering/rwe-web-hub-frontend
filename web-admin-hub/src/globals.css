@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Rethink+Sans:wght@400;600&display=swap');
+
+@theme {
+  --color-background-primary: #fff;
+  --color-background-secondary: #f2f2f2;
+  --color-background-tertiary: #dddddd;
+  --color-background-accent: #76903A;
+  --color-background-accent-secondary: #D58C34;
+  --color-text-primary: #34502C;
+  --color-text-secondary: #74B364;
+  --color-foreground-primary: #222222;
+  --color-foreground-secondary: #555555;
+  --color-foreground-tertiary: #888888;
+}
+
+.dark {
+  --color-background-primary: #1e1e1e;
+  --color-background-secondary: #2c2c2c;
+  --color-background-tertiary: #3c3c3c;
+  --color-text-primary: #8BDB75;
+  --color-text-secondary: #C2DEB0;
+  --color-foreground-primary: #FFFFFF;
+  --color-foreground-secondary: #DDDDDD;
+  --color-foreground-tertiary: #AAAAAA;
+}
+
+body {
+  font-family: 'Rethink Sans', ui-sans-serif, system-ui;
+  background-color: var(--color-background-primary);
+  color: var(--color-foreground-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Roboto Slab', ui-serif, Georgia;
+  color: var(--color-text-primary);
+}
