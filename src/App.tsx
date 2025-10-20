@@ -1,12 +1,13 @@
+import { BrowserRouter } from 'react-router-dom'
 import './globals.css'
+import AppRoutes from './routes/AppRoutes'
 
-function App() {
-
-  return (
-    <>
-      <h1>Vite + React</h1>
-    </>
-  )
+const App = () => {
+	return (
+		<BrowserRouter>
+			<AppRoutes />
+		</BrowserRouter>
+	);
 }
 
-export default App
+export default App;
