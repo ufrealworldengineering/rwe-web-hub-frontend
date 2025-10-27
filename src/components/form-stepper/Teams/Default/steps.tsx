@@ -8,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { FormStepDefinition } from '@/components/form-stepper/stepper';
+import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
 import { User } from 'lucide-react';
 
 // NOTE: These are the DEFAULT STEPS, meaning they are the first step for all applications

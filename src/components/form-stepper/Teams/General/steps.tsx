@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { FormStepDefinition } from '@/components/form-stepper/stepper';
+import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
 import { FileText } from 'lucide-react';
 
 export const Step1General = () => {

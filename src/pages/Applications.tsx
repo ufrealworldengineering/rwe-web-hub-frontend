@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { FormStepper } from '@/components/form-stepper/stepper';
-import type { FormStepDefinition } from '@/components/form-stepper/stepper';
+import { FormStepper } from '@/components/form-stepper/formstepper';
+import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
 
 import { defaultSteps } from '@/components/form-stepper/Teams/Default/steps';
 import { generalSteps } from '@/components/form-stepper/Teams/General/steps';
