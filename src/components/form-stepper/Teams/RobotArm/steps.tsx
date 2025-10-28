@@ -62,6 +62,7 @@ export const Step1RobotArm = () => {
                 }
             />
             <div>
+                {/* TODO: integrate multi-select instead of single select */}
                 <Label>Which role(s) are you applying for?</Label>
                 <Controller
                     control={control}
