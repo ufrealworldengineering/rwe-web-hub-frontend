@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
-import { FileText } from 'lucide-react';
+import { ChevronsLeftRightEllipsis } from 'lucide-react';
 
 // NOTE: These are the WEB DEV STEPS, meaning they are the served only if WEB DEV team is selected
 
@@ -13,7 +13,7 @@ export const Step1Web = () => {
 
     return (
         <div className='space-y-4'>
-            <h2 className='text-lg font-medium'>Member Profile</h2>
+            <h2 className='text-lg font-medium'>Software Design Team</h2>
             <div>
                 <Label htmlFor='fullName'>Full name</Label>
                 <Input
@@ -51,7 +51,7 @@ export const Step1Web = () => {
 export const webSteps: FormStepDefinition[] = [
     {
         id: 'details',
-        label: { icon: FileText, label: 'Details', subcontent: 'More details' },
+        label: { icon: ChevronsLeftRightEllipsis, label: 'Software Team', subcontent: 'Team application details' },
         Component: Step1Web
     }
 ];

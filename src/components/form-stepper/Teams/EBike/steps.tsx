@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
-import { FileText } from 'lucide-react';
+import { Motorbike } from 'lucide-react';
 
 // NOTE: These are the EBIKE STEPS, meaning they are the served only if EBIKE team is selected
 
@@ -13,7 +13,7 @@ export const Step1EBike = () => {
 
     return (
         <div className='space-y-4'>
-            <h2 className='text-lg font-medium'>Member Profile</h2>
+            <h2 className='text-lg font-medium'>E-Bike Design Team</h2>
             <div>
                 <Label htmlFor='fullName'>Full name</Label>
                 <Input
@@ -51,7 +51,7 @@ export const Step1EBike = () => {
 export const ebikeSteps: FormStepDefinition[] = [
     {
         id: 'details',
-        label: { icon: FileText, label: 'Details', subcontent: 'More details' },
+        label: { icon: Motorbike, label: 'E-Bike Team', subcontent: 'Team application details' },
         Component: Step1EBike
     }
 ];
