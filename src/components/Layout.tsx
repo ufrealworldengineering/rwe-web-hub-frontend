@@ -22,13 +22,13 @@ const Layout = () => {
         </button>
         <button
           className="text-lg font-semibold text-text-primary hover:text-accent"
-          onClick={() => navigate("/sponsors")}
+          onClick={() => navigate("/applications")}
         >
           Apply
         </button>
         <button
           className="text-lg font-semibold text-text-primary hover:text-accent"
-          onClick={() => navigate("/applications")}
+          onClick={() => navigate("/sponsors")}
         >
           Sponsors
         </button>
