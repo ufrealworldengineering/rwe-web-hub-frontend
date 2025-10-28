@@ -1,0 +1,157 @@
+import { useFormContext, Controller } from 'react-hook-form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
+import { User, FileInput } from 'lucide-react';
+
+// NOTE: These are the DEFAULT STEPS, meaning they are the first step for all applications
+//       rendered through the /Applications.tsx page.
+
+export const Step1Default = () => {
+    const methods = useFormContext();
+    const { register, formState, control } = methods;
+    const errors = formState.errors ?? {};
+
+    return (
+        <div className='space-y-4'>
+            <h2 className='text-lg font-medium'>Member Profile</h2>
+            <div>
+                <Label htmlFor='full_name'>Full Name</Label>
+                <Input
+                    id='full_name'
+                    placeholder='e.g., John Smith'
+                    {...register('full_name', { required: 'Full name is required' })}
+                    className='mt-1 bg-background-tertiary'
+                />
+                {errors.full_name && <p className='text-sm text-red-500'>{String(errors.full_name?.message)}</p>}
+            </div>
+            <div>
+                <Label htmlFor='email'>UFL Email</Label>
+                <Input
+                    id='email'
+                    placeholder='e.g., john.smith@ufl.edu'
+                    {...register('email', { required: 'Email is required', minLength: { value: 3, message: 'At least 3 characters' } })}
+                    className='mt-1 bg-background-tertiary'
+                />
+                {errors.email && <p className='text-sm text-red-500'>{String(errors.email?.message)}</p>}
+            </div>
+            <div>
+                <Label>Major</Label>
+                <Input
+                    id='major'
+                    placeholder='e.g., Mechanical Engineering'
+                    {...register('major', { required: 'Major is required' })}
+                    className='mt-1 bg-background-tertiary'
+                />
+                {errors.major && <p className='text-sm text-red-500'>{String(errors.major?.message)}</p>}
+            </div>
+            <div>
+                <Label>Design Team</Label>
+                <Controller
+                    control={control}
+                    name='team'
+                    defaultValue='default'
+                    rules={{
+                        validate: value => value !== 'default' || 'Please choose a team'
+                    }}
+                    render={({ field: { value, onChange } }) => (
+                        <Select onValueChange={onChange} value={value}>
+                            <SelectTrigger className='mt-1 bg-background-tertiary'>
+                                <SelectValue placeholder='Choose...' />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value='default'>Choose...</SelectItem>
+                                <SelectItem value='general'>General</SelectItem>
+                                <SelectItem value='drone'>Drone</SelectItem>
+                                <SelectItem value='robotarm'>Robot Arm</SelectItem>
+                                <SelectItem value='ebike'>E-Bike</SelectItem>
+                                <SelectItem value='web'>Web Dev</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                />
+                {errors.team && <p className='text-sm text-red-500'>{String(errors.team?.message)}</p>}
+            </div>
+        </div>
+    );
+};
+
+export const Step2Default = () => {
+    const methods = useFormContext();
+    const { register, formState } = methods;
+    const errors = formState.errors ?? {};
+
+    return (
+        <div className='space-y-4'>
+            <h2 className='text-lg font-medium'>Key Information</h2>
+            <div>
+                <Label htmlFor='resume'>Please upload your resume</Label>
+                {/* py-2 because the "Browse..."" text isn't centered by default */}
+                <Input
+                    id='resume'
+                    type='file'
+                    {...register('resume')}
+                    className='mt-1 bg-background-tertiary py-2' 
+                />
+                {errors.resume && <p className='text-sm text-red-500'>{String(errors.resume?.message)}</p>}
+            </div>
+            <div>
+                <Label htmlFor='experience'>Describe your experiences (past projects, applicable classes, etc.)</Label>
+                <Textarea
+                    id='experience'
+                    placeholder='...'
+                    {...register('experience', { required: 'Experience is required', maxLength: { value: 400, message: 'Maximum 400 characters' } })}
+                    className='mt-1 bg-background-tertiary'
+                />
+                {errors.experience && <p className='text-sm text-red-500'>{String(errors.experience?.message)}</p>}
+            </div>
+            <div>
+                <Label>How did you hear about us?</Label>
+                <Input
+                    id='how_heard'
+                    placeholder='...'
+                    {...register('how_heard', { required: 'Please tell us how you heard about RWE' })}
+                    className='mt-1 bg-background-tertiary'
+                />
+                {errors.how_heard && <p className='text-sm text-red-500'>{String(errors.how_heard?.message)}</p>}
+            </div>
+            <div>
+                <Label>
+                    By submitting this application, I grant permission for my application materials to be
+                    shared with the design team's recruitment committee and/or the Real World
+                    Engineering executive committee for the purpose of evaluating my eligibility for the team. I
+                    understand that my information will be used only for this selection process and will not be
+                    shared beyond the authorized reviewers.
+                </Label>
+                <Input
+                    id='consent'
+                    placeholder='e.g., John Smith'
+                    {...register('consent', { required: 'Type your full, legal name to consent' })}
+                    className='mt-1 bg-background-tertiary'
+                />
+                {errors.consent && <p className='text-sm text-red-500'>{String(errors.consent?.message)}</p>}
+            </div>
+        </div>
+    );
+};
+
+export const defaultSteps: FormStepDefinition[] = [
+    {
+        id: 'member',
+        label: { icon: User, label: 'Profile', subcontent: 'Basic personal information' },
+        Component: Step1Default
+    },
+    {
+        id: 'submission',
+        label: { icon: FileInput, label: 'Submission', subcontent: 'Application review and submission' },
+        Component: Step2Default
+    }
+];
