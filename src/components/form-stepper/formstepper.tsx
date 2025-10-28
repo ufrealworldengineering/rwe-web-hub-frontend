@@ -6,6 +6,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import '@/globals.css';
 
+// TODO: formalize individual components (input, radio group, select, text area, text content) 
+//       for easier form building
+
 // Content necessary for a form label 
 // (the separate card rendered at the top)
 export type FormStepLabel = {
