@@ -32,7 +32,10 @@ const Applications = () => {
     // If <Select>'ed team changes, swap step array to new team
     useEffect(() => {
         const selected = selectedTeam ?? 'default';
-        const newSteps = [...defaultSteps, ...(teamMap[selected] ?? [])]; // example: default steps + team-specific
+        // defaultSteps[0]: initial member profile information, 
+        // teamMap[selected]: selected team's application, 
+        // defaultSteps[1]: submission 
+        const newSteps = [defaultSteps[0], ...(teamMap[selected] ?? []), defaultSteps[1]];
         setSteps(newSteps);
 
         // Reset form the prev selected team field so values don't carry over
