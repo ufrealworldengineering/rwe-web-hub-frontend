@@ -1,3 +1,5 @@
+import LogoMarquee from "@/components/logo-marquee";
+
 const Sponsors = () => {
     return (
         <section className="space-y-4">
@@ -5,6 +7,7 @@ const Sponsors = () => {
             <p className="max-w-2xl text-foreground-secondary">
                 Sponsors...
             </p>
+            <LogoMarquee />
         </section>
     );
 }
