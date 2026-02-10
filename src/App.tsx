@@ -4,7 +4,7 @@ import AppRoutes from './routes/AppRoutes'
 
 const App = () => {
 	return (
-		<BrowserRouter>
+		<BrowserRouter basename='/rwe-web-hub-frontend'>
 			<AppRoutes />
 		</BrowserRouter>
 	);

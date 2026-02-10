@@ -22,7 +22,7 @@ const About = () => {
       name: "Web Development",
       description: "Description.....",
       members: [
-        { name: "First Last", role: "role", about: "about me info here..." },
+        { name: "John Smith", role: "role", about: "hello!" },
         { name: "First Last", role: "role", about: "about me info here..." },
         { name: "First Last", role: "role", about: "about me info here..." },
       ],
@@ -80,8 +80,8 @@ const About = () => {
         </p>
       </div>
       <div className="flex flex-col items-center lg:flex-row lg:justify-center gap-16">
-        {currTeam.members.map((member) => (
-          <Card className="min-w-56 max-w-100" key={member.name}>
+        {currTeam.members.map((member, index) => (
+          <Card className="min-w-56 max-w-100" key={index}>
             <CardHeader>
               <CardTitle>{member.name}</CardTitle>
               <CardDescription>{member.role}</CardDescription>
