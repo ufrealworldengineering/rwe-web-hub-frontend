@@ -1,155 +1,200 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Rethink+Sans:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;900&family=Rethink+Sans:wght@400;800&display=swap');
 
 @plugin "tailwindcss-animate";
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background-primary: #fff;
-  --color-background-secondary: #f2f2f2;
-  --color-background-tertiary: #dddddd;
-  --color-background-accent: #76903A;
-  --color-background-accent-secondary: #D58C34;
-  --color-text-primary: #34502C;
-  --color-text-secondary: #74B364;
-  --color-foreground-primary: #222222;
-  --color-foreground-secondary: #555555;
-  --color-foreground-tertiary: #888888;
+	--color-background-primary: #fff;
+	--color-background-secondary: #f2f2f2;
+	--color-background-tertiary: #dddddd;
+	--color-background-accent: #76903A;
+	--color-background-accent-secondary: #D58C34;
+	--color-text-primary: #34502C;
+	--color-text-secondary: #74B364;
+	--color-foreground-primary: #222222;
+	--color-foreground-secondary: #555555;
+	--color-foreground-tertiary: #888888;
 
-  --background: var(--color-background-primary);
-  --foreground: var(--color-foreground-primary);
-  --card: var(--color-background-secondary);
-  --card-foreground: var(--color-foreground-primary);
-  --popover: var(--color-background-primary);
-  --popover-foreground: var(--color-foreground-primary);
-  --primary: var(--color-background-accent);
-  --primary-foreground: var(--color-foreground-primary);
-  --secondary: var(--color-background-accent-secondary);
-  --secondary-foreground: var(--color-foreground-primary);
-  --muted: var(--color-background-tertiary);
-  --muted-foreground: var(--color-foreground-secondary);
-  --accent: var(--color-background-accent);
-  --accent-foreground: var(--color-foreground-primary);
+	--background: var(--color-background-primary);
+	--foreground: var(--color-foreground-primary);
+	--card: var(--color-background-secondary);
+	--card-foreground: var(--color-foreground-primary);
+	--popover: var(--color-background-primary);
+	--popover-foreground: var(--color-foreground-primary);
+	--primary: var(--color-background-accent);
+	--primary-foreground: var(--color-foreground-primary);
+	--secondary: var(--color-background-accent-secondary);
+	--secondary-foreground: var(--color-foreground-primary);
+	--muted: var(--color-background-tertiary);
+	--muted-foreground: var(--color-foreground-secondary);
+	--accent: var(--color-background-accent);
+	--accent-foreground: var(--color-foreground-primary);
 }
 
 .dark {
-  --color-background-primary: #1e1e1e;
-  --color-background-secondary: #2c2c2c;
-  --color-background-tertiary: #3c3c3c;
-  --color-text-primary: #8BDB75;
-  --color-text-secondary: #C2DEB0;
-  --color-foreground-primary: #FFFFFF;
-  --color-foreground-secondary: #DDDDDD;
-  --color-foreground-tertiary: #AAAAAA;
+	--color-background-primary: #1e1e1e;
+	--color-background-secondary: #2c2c2c;
+	--color-background-tertiary: #3c3c3c;
+	--color-text-primary: #8BDB75;
+	--color-text-secondary: #C2DEB0;
+	--color-foreground-primary: #FFFFFF;
+	--color-foreground-secondary: #DDDDDD;
+	--color-foreground-tertiary: #AAAAAA;
 
-  --background: var(--color-background-primary);
-  --foreground: var(--color-foreground-primary);
-  --card: var(--color-background-secondary);
-  --card-foreground: var(--color-foreground-primary);
-  --popover: var(--color-background-secondary);
-  --popover-foreground: var(--color-foreground-primary);
-  --primary: var(--color-text-primary);
-  --primary-foreground: var(--color-foreground-primary);
-  --secondary: var(--color-text-secondary);
-  --secondary-foreground: var(--color-foreground-primary);
-  --muted: var(--color-background-tertiary);
-  --muted-foreground: var(--color-foreground-secondary);
-  --accent: var(--color-text-primary);
-  --accent-foreground: var(--color-foreground-primary);
+	--background: var(--color-background-primary);
+	--foreground: var(--color-foreground-primary);
+	--card: var(--color-background-secondary);
+	--card-foreground: var(--color-foreground-primary);
+	--popover: var(--color-background-secondary);
+	--popover-foreground: var(--color-foreground-primary);
+	--primary: var(--color-text-primary);
+	--primary-foreground: var(--color-foreground-primary);
+	--secondary: var(--color-text-secondary);
+	--secondary-foreground: var(--color-foreground-primary);
+	--muted: var(--color-background-tertiary);
+	--muted-foreground: var(--color-foreground-secondary);
+	--accent: var(--color-text-primary);
+	--accent-foreground: var(--color-foreground-primary);
 }
 
-body {
-  font-family: 'Rethink Sans', ui-sans-serif, system-ui;
-  background-color: var(--color-background-primary);
-  color: var(--color-foreground-primary);
+@keyframes hero-text-animation {
+
+	0%,
+	20% {
+		top: 0;
+	}
+
+	25%,
+	45% {
+		top: -60px;
+	}
+
+	50%,
+	70% {
+		top: -120px;
+	}
+
+	75%,
+	100% {
+		top: -180px;
+	}
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Roboto Slab', ui-serif, Georgia;
-  color: var(--color-text-primary);
+@keyframes hero-text-color {
+
+	0%,
+	75% {
+		color: var(--color-text-secondary)
+	}
+
+	100% {
+		color: var(--color-text-primary)
+	}
+}
+
+.animate-hero-text {
+	animation: hero-text-animation 6s ease-in-out forwards, hero-text-color 6s forwards
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
 }
 
 :root {
-  --radius: 0.625rem;
+	--radius: 0.625rem;
 
-  --background: var(--color-background-primary);
-  --foreground: var(--color-foreground-primary);
-  --card: var(--color-background-secondary);
-  --card-foreground: var(--color-foreground-primary);
-  --popover: var(--color-background-primary);
-  --popover-foreground: var(--color-foreground-primary);
-  --primary: var(--color-background-accent);
-  --primary-foreground: var(--color-foreground-primary);
-  --secondary: var(--color-background-accent-secondary);
-  --secondary-foreground: var(--color-foreground-primary);
-  --muted: var(--color-background-tertiary);
-  --muted-foreground: var(--color-foreground-secondary);
-  --accent: var(--color-background-accent);
-  --accent-foreground: var(--color-foreground-primary);
-  --destructive: #e11d48;
-  --border: var(--color-background-tertiary);
-  --input: var(--color-background-secondary);
-  --ring: var(--color-background-accent);
+	--background: var(--color-background-primary);
+	--foreground: var(--color-foreground-primary);
+	--card: var(--color-background-secondary);
+	--card-foreground: var(--color-foreground-primary);
+	--popover: var(--color-background-primary);
+	--popover-foreground: var(--color-foreground-primary);
+	--primary: var(--color-background-accent);
+	--primary-foreground: var(--color-foreground-primary);
+	--secondary: var(--color-background-accent-secondary);
+	--secondary-foreground: var(--color-foreground-primary);
+	--muted: var(--color-background-tertiary);
+	--muted-foreground: var(--color-foreground-secondary);
+	--accent: var(--color-background-accent);
+	--accent-foreground: var(--color-foreground-primary);
+	--destructive: #e11d48;
+	--border: var(--color-background-tertiary);
+	--input: var(--color-background-secondary);
+	--ring: var(--color-background-accent);
 
-  --chart-1: var(--color-background-accent);
-  --chart-2: var(--color-background-accent-secondary);
-  --chart-3: var(--color-text-secondary);
-  --chart-4: var(--color-foreground-secondary);
-  --chart-5: var(--color-foreground-tertiary);
+	--chart-1: var(--color-background-accent);
+	--chart-2: var(--color-background-accent-secondary);
+	--chart-3: var(--color-text-secondary);
+	--chart-4: var(--color-foreground-secondary);
+	--chart-5: var(--color-foreground-tertiary);
 
-  --sidebar: var(--color-background-secondary);
-  --sidebar-foreground: var(--color-foreground-primary);
-  --sidebar-primary: var(--color-background-accent);
-  --sidebar-primary-foreground: var(--color-foreground-primary);
-  --sidebar-accent: var(--color-background-accent-secondary);
-  --sidebar-accent-foreground: var(--color-foreground-primary);
-  --sidebar-border: var(--color-background-tertiary);
-  --sidebar-ring: var(--color-background-accent);
+	--sidebar: var(--color-background-secondary);
+	--sidebar-foreground: var(--color-foreground-primary);
+	--sidebar-primary: var(--color-background-accent);
+	--sidebar-primary-foreground: var(--color-foreground-primary);
+	--sidebar-accent: var(--color-background-accent-secondary);
+	--sidebar-accent-foreground: var(--color-foreground-primary);
+	--sidebar-border: var(--color-background-tertiary);
+	--sidebar-ring: var(--color-background-accent);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+	* {
+		@apply border-border outline-ring/50;
+	}
+
+	body {
+		@apply bg-background text-foreground;
+	}
+
+	body {
+		font-family: 'Rethink Sans', ui-sans-serif, system-ui;
+		background-color: var(--color-background-primary);
+		color: var(--color-foreground-primary);
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: 'Roboto Slab', ui-serif, Georgia;
+		color: var(--color-text-primary);
+	}
 }
