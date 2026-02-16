@@ -1,15 +1,15 @@
 import { Route, Routes } from 'react-router-dom';
 import Layout from '../components/Layout';
-import Home from '../pages/Home';
-import About from '../pages/About';
-import Sponsors from '../pages/Sponsors';
+import About from '../pages/MainSections/TeamAbout';
+import Sponsors from '../pages/MainSections/Sponsors';
 import Applications from '../pages/Applications';
+import Main from '@/pages/Main';
 
 const AppRoutes = () => {
     return (
         <Routes>
             <Route element={<Layout />}>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Main />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/applications" element={<Applications />} />
