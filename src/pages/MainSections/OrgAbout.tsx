@@ -6,8 +6,9 @@ import {
     CarouselItem,
     CarouselDots
 } from "@/components/ui/carousel"
-import Autoplay from "embla-carousel-autoplay";
-import useEmblaCarousel from "embla-carousel-react";
+
+// import Autoplay from "embla-carousel-autoplay";
+// import useEmblaCarousel from "embla-carousel-react";
 
 import { Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
