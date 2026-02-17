@@ -1,11 +1,3 @@
-import React, { useEffect, useState } from "react"
-import {
-    NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuTrigger,
-    NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-
 import { Card, CardContent } from "@/components/ui/card"
 import {
     Carousel,
@@ -15,6 +7,7 @@ import {
 } from "@/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay";
 
+/*
 type Team = {
     id: string
     name: string
@@ -57,6 +50,7 @@ const teams: Team[] = [
         ],
     },
 ]
+*/
 
 const TeamAbout = () => {
     return (
