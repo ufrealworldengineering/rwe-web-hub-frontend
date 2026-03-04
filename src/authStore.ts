@@ -3,7 +3,7 @@ import {persist} from 'zustand/middleware';
 
 
 //the four roles that exist in backend
-export type UserRole = 'presidet' | 'treasurer' |'program_manager' | 'member';
+export type UserRole = 'president' | 'treasurer' |'program_manager' | 'member';
 
 export interface User{ 
     name: string;
