@@ -4,23 +4,22 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
     return (
-        <footer className="mt-auto py-5 flex flex-col items-center">
-            <div className='flex'>
+        <footer className="mt-auto py-5 flex flex-col items-center px-4">
+            <div className='flex items-center gap-1'>
                 <img
                     alt='RWE Logo'
-                    className="self-center w-5 float-left mr-1"
+                    className="w-5"
                     src={rwe_logo}
-
                 />
-                <p className="text-lg text-muted-foreground">
+                <p className="text-base sm:text-lg text-muted-foreground">
                     Real World Engineering
                 </p>
             </div>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 University of Florida · Gainesville, FL
             </p>
-            <div className="flex flex-col items-center md:items-end gap-2 mt-1">
+            <div className="flex flex-col items-center gap-2 mt-1">
                 <div className="flex space-x-4">
                     <Link
                         to='https://www.instagram.com/realworldengineering?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=='

@@ -25,34 +25,26 @@ type BoardMember = {
 
 const EBoard: BoardMember[] = [
     {
-        name: "Brady Carrington",
+        name: "Sarveshwaran Palani",
         role: "President",
         imgURL: stockHeadshot,
         description: "Previous @ ",
         linkedin: "brady-carrington"
     },
     {
-        name: "Allario Carni",
-        role: "Vice-President",
+        name: "Ian Towns",
+        role: "Vice President",
         imgURL: stockHeadshot,
         description: "Desc...",
         linkedin: "brady-carrington"
     },
     {
-        name: "Grant Sherman",
-        role: "Robot Arm Program Manager",
+        name: "Michael Smith",
+        role: "Treasurer",
         imgURL: stockHeadshot,
         description: "Previous @ ",
         linkedin: "brady-carrington"
     },
-    {
-        name: "Alina Garib",
-        role: "SWE Program Manager",
-        imgURL: stockHeadshot,
-        description: "Desc...",
-        linkedin: "brady-carrington"
-    },
-
 ];
 
 const OrgAbout = () => {
@@ -79,9 +71,9 @@ const OrgAbout = () => {
 
     return (
         <section className="flex flex-col w-full items-center justify-center bg-background-accent py-4">
-            <div className="flex flex-row items-center justify-between w-full gap-24 px-32">
-                <div className="flex flex-col items-center">
-                    <h1 className="text-lg font-bold ">Meet Our Executive Board</h1>
+            <div className="flex flex-col md:flex-row items-center w-full gap-8 md:gap-12 lg:gap-16 px-6 md:px-16 lg:px-32 py-4">
+                <div className="flex flex-col items-center md:items-start w-full md:w-auto md:shrink-0">
+                    <h1 className="text-lg font-bold">Meet Our Executive Board</h1>
                     <p className="text-medium text-accent-foreground mb-4">
                         <span className="block font-semibold text-text-secondary">
                             {selected.name}
@@ -95,6 +87,7 @@ const OrgAbout = () => {
                     </p>
                     <p className="text-medium text-accent-foreground">.</p>
                 </div>
+                <div className="w-full min-w-0">
                 <Carousel
                     opts={{
                         loop: true,
@@ -104,7 +97,7 @@ const OrgAbout = () => {
                     <CarouselContent className="py-8">
                         {/* TODO: modify carousel card sizes to be smaller if not the current card */}
                         {EBoard.map((item, index) => (
-                            <CarouselItem key={index} className="basis-1/3">
+                            <CarouselItem key={index} className="basis-1/2 sm:basis-1/3">
                                 <Card className="p-4">
                                     <CardContent className="flex flex-col aspect-[3/4] gap-3 items-center justify-center">
                                         <div
@@ -134,6 +127,7 @@ const OrgAbout = () => {
                     </CarouselContent>
                     <CarouselDots ringClass="border-background-accent-secondary" activeClass="bg-background-accent-secondary" />
                 </Carousel>
+                </div>
             </div>
         </section>
     )
