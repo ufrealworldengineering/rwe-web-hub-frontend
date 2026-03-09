@@ -10,7 +10,22 @@ import { droneSteps } from '@/components/form-stepper/Teams/Drone/steps';
 import { webSteps } from '@/components/form-stepper/Teams/Web/steps';
 import { ebikeSteps } from '@/components/form-stepper/Teams/EBike/steps';
 import { armSteps } from '@/components/form-stepper/Teams/RobotArm/steps';
-import { useSubmitApplication } from '@/hooks/useApplication';
+import { useSubmitApplication } from '@/api/hooks/useApplication';
+
+// Fields shared across all applications (Step1Default + Step2Default)
+type ApplicationFormValues = {
+    team: string;
+    year: string;
+    full_name: string;
+    email: string;
+    major: string;
+    resume: FileList | undefined;
+    experience: string;
+    how_heard: string;
+    consent: string;
+    // allow additional team-specific fields
+    [key: string]: unknown;
+};
 
 // import all steps from each team to dynamically render steps
 const teamMap: Record<string, FormStepDefinition[]> = {
@@ -22,8 +37,8 @@ const teamMap: Record<string, FormStepDefinition[]> = {
 };
 
 const Applications = () => {
-    const methods = useForm({ defaultValues: { team: 'default' } });
-    const { watch, reset } = methods;
+    const methods = useForm<ApplicationFormValues>({ defaultValues: { team: 'default', year: 'default' } });
+    const { watch, reset, getValues } = methods;
 
     const [steps, setSteps] = useState<FormStepDefinition[]>([...defaultSteps]);
 
@@ -34,16 +49,16 @@ const Applications = () => {
 
     // if <Select>'ed team changes, swap step array to new team
     useEffect(() => {
-        const selected = selectedTeam ?? 'default';
+        const team = selectedTeam ?? 'default';
         // defaultSteps[0]: initial member profile information, 
         // teamMap[selected]: selected team's application, 
         // defaultSteps[1]: submission 
-        const newSteps = [defaultSteps[0], ...(teamMap[selected] ?? []), defaultSteps[1]];
+        const newSteps = [defaultSteps[0], ...(teamMap[team] ?? []), defaultSteps[1]];
         setSteps(newSteps);
 
-        // reset form the prev selected team field so values don't carry over
-        const prev = { team: selected };
-        reset(prev);
+        // preserve Step1Default + Step2Default fields; clear only team-specific fields
+        const { full_name, email, major, year, resume, experience, how_heard, consent } = getValues();
+        reset({ full_name, email, major, year, team, resume, experience, how_heard, consent });
         resetSubmit();
     }, [selectedTeam, reset, resetSubmit]);
 
@@ -69,7 +84,7 @@ const Applications = () => {
                     </div>
 
                     {isSuccess && (
-                        <div className='mb-4 rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800'>
+                        <div className='mb-4 rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-text-primary'>
                             Application submitted successfully! We'll be in touch soon.
                         </div>
                     )}
