@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import api from '../api.ts';
 import type {
     ApplicationCreate,
     ApplicationFilters,
@@ -16,6 +16,7 @@ const applicationKeys = {
 };
 
 // (ADMIN) FETCH ALL/FILTERED APPLICATIONS
+// GET /applications/filter
 export const useApplications = (filters?: ApplicationFilters) => {
     return useQuery<ApplicationResponse[]>({
         queryKey: applicationKeys.filtered(filters),
@@ -32,6 +33,7 @@ export const useApplications = (filters?: ApplicationFilters) => {
 };
 
 // (ADMIN) FETCH SINGLE APPLICATION BY ID
+// GET /applications/:id
 export const useApplication = (id: string) => {
     return useQuery<ApplicationResponse>({
         queryKey: applicationKeys.detail(id),
@@ -48,6 +50,7 @@ export const useApplication = (id: string) => {
 };
 
 // (CLIENT) UPLOAD RESUME
+// POST /applications/resume
 // sends a multipart/form-data POST, returns stored resume URL
 export const useUploadResume = () => {
     return useMutation<ResumeUploadResponse, Error, File>({
@@ -55,7 +58,7 @@ export const useUploadResume = () => {
             const form = new FormData();
             form.append('resume', file);
             const { data } = await api.post<ResumeUploadResponse>(
-                '/applications/resume',
+                '/apply/resume',
                 form,
                 { headers: { 'Content-Type': 'multipart/form-data' } }
             );
@@ -65,13 +68,14 @@ export const useUploadResume = () => {
 };
 
 // (CLIENT) SUBMIT APPLICATION
+// POST /apply
 export const useCreateApplication = () => {
     const queryClient = useQueryClient();
 
     return useMutation<ApplicationResponse, Error, ApplicationCreate>({
         mutationFn: async (payload: ApplicationCreate) => {
             const { data } = await api.post<ApplicationResponse>(
-                '/applications/apply',
+                '/apply',
                 payload
             );
             return data;
