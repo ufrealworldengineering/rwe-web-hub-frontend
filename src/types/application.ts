@@ -7,6 +7,7 @@ export type ApplicationCore = {
     full_name: string;
     email: string;
     major: string;
+    year: string;
     team: Team;
     experience: string;
     how_heard: string;
