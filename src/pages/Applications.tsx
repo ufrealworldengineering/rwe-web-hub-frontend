@@ -10,8 +10,24 @@ import { droneSteps } from '@/components/form-stepper/Teams/Drone/steps';
 import { webSteps } from '@/components/form-stepper/Teams/Web/steps';
 import { ebikeSteps } from '@/components/form-stepper/Teams/EBike/steps';
 import { armSteps } from '@/components/form-stepper/Teams/RobotArm/steps';
+import { useSubmitApplication } from '@/api/hooks/useApplication';
 
-// Import all steps from each team to dynamically render steps
+// Fields shared across all applications (Step1Default + Step2Default)
+type ApplicationFormValues = {
+    team: string;
+    year: string;
+    full_name: string;
+    email: string;
+    major: string;
+    resume: FileList | undefined;
+    experience: string;
+    how_heard: string;
+    consent: string;
+    // allow additional team-specific fields
+    [key: string]: unknown;
+};
+
+// import all steps from each team to dynamically render steps
 const teamMap: Record<string, FormStepDefinition[]> = {
     general: generalSteps,
     drone: droneSteps,
@@ -21,32 +37,37 @@ const teamMap: Record<string, FormStepDefinition[]> = {
 };
 
 const Applications = () => {
-    const methods = useForm({ defaultValues: { team: 'default' } });
-    const { watch, reset } = methods;
+    const methods = useForm<ApplicationFormValues>({ defaultValues: { team: 'default', year: 'default' } });
+    const { watch, reset, getValues } = methods;
 
     const [steps, setSteps] = useState<FormStepDefinition[]>([...defaultSteps]);
 
-    // Watch 'team' field to detect when selected team changes
+    const { submit, isPending, isSuccess, isError, error, reset: resetSubmit } = useSubmitApplication();
+
+    // watch 'team' field to detect when selected team changes
     const selectedTeam = watch('team');
 
-    // If <Select>'ed team changes, swap step array to new team
+    // if <Select>'ed team changes, swap step array to new team
     useEffect(() => {
-        const selected = selectedTeam ?? 'default';
+        const team = selectedTeam ?? 'default';
         // defaultSteps[0]: initial member profile information, 
         // teamMap[selected]: selected team's application, 
         // defaultSteps[1]: submission 
-        const newSteps = [defaultSteps[0], ...(teamMap[selected] ?? []), defaultSteps[1]];
+        const newSteps = [defaultSteps[0], ...(teamMap[team] ?? []), defaultSteps[1]];
         setSteps(newSteps);
 
-        // Reset form the prev selected team field so values don't carry over
-        const prev = { team: selected };
-        reset(prev);
-    }, [selectedTeam, reset]);
+        // preserve Step1Default + Step2Default fields; clear only team-specific fields
+        const { full_name, email, major, year, resume, experience, how_heard, consent } = getValues();
+        reset({ full_name, email, major, year, team, resume, experience, how_heard, consent });
+        resetSubmit();
+    }, [selectedTeam, reset, resetSubmit]);
 
     const handleSubmit = (values: any) => {
-        console.log('Collected values from all steps:', values);
-        // TODO: check if all required information has been filled, redirect or highlight step if not
-        // TODO: send form submission to backend/email
+        // extract the File from RHF's FileList (input type="file" returns a FileList)
+        const rawFile = values.resume?.[0];
+        const file = rawFile instanceof File ? rawFile : undefined;
+        console.log(values);
+        submit({ values, file });
     };
 
     return (
@@ -62,11 +83,30 @@ const Applications = () => {
                         </div>
                     </div>
 
+                    {isSuccess && (
+                        <div className='mb-4 rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-text-primary'>
+                            Application submitted successfully! We'll be in touch soon.
+                        </div>
+                    )}
+
+                    {isError && (
+                        <div className='mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800'>
+                            {error?.message ?? 'Something went wrong. Please try again.'}
+                        </div>
+                    )}
+
                     <FormStepper
                         steps={steps}
                         onSubmit={handleSubmit}
                         form={methods}
+                        disabled={isPending || isSuccess}
                     />
+
+                    {isPending && (
+                        <p className='mt-3 text-center text-sm text-muted-foreground'>
+                            Submitting your application…
+                        </p>
+                    )}
                 </div>
             </div>
         </section>
