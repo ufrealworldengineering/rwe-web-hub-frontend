@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import type { AxiosError } from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api.ts';
 import type {
@@ -15,17 +16,38 @@ const applicationKeys = {
     detail: (id: string) => [...applicationKeys.all, id] as const,
 };
 
+const toError = (error: unknown, fallback: string): Error => {
+    if (error instanceof Error) {
+        return error;
+    }
+
+    if (error && typeof error === 'object') {
+        const axiosError = error as AxiosError<{ detail?: string }>;
+        const message = axiosError.response?.data?.detail;
+        if (message) {
+            return new Error(message);
+        }
+    }
+
+    return new Error(fallback);
+};
+
 // (ADMIN) FETCH ALL/FILTERED APPLICATIONS
 // GET /applications/filter
 export const useApplications = (filters?: ApplicationFilters) => {
     return useQuery<ApplicationResponse[]>({
         queryKey: applicationKeys.filtered(filters),
         queryFn: async () => {
-            const { data } = await api.get<ApplicationResponse[]>(
-                '/applications/filter',
-                { params: filters }
-            );
-            return data;
+            try {
+                const { data } = await api.get<ApplicationResponse[]>(
+                    '/applications/filter',
+                    { params: filters }
+                );
+                return data;
+            }
+            catch (error) {
+				throw toError(error, 'Failed to fetch applications');
+            }
         },
         staleTime: 1000 * 60 * 2,  // 2 minutes (cache is fresh)
         gcTime: 1000 * 60 * 5,     // 5 minutes (how long inactive before removed)
@@ -38,10 +60,15 @@ export const useApplication = (id: string) => {
     return useQuery<ApplicationResponse>({
         queryKey: applicationKeys.detail(id),
         queryFn: async () => {
-            const { data } = await api.get<ApplicationResponse>(
-                `/applications/${id}`
-            );
-            return data;
+            try {
+                const { data } = await api.get<ApplicationResponse>(
+                    `/applications/${id}`
+                );
+                return data;
+            }
+            catch (error) {
+				throw toError(error, 'Failed to fetch application');
+            }
         },
         enabled: Boolean(id),
         staleTime: 1000 * 60 * 2,
@@ -55,14 +82,19 @@ export const useApplication = (id: string) => {
 export const useUploadResume = () => {
     return useMutation<ResumeUploadResponse, Error, File>({
         mutationFn: async (file: File) => {
-            const form = new FormData();
-            form.append('resume', file);
-            const { data } = await api.post<ResumeUploadResponse>(
-                '/apply/resume',
-                form,
-                { headers: { 'Content-Type': 'multipart/form-data' } }
-            );
-            return data;
+            try {
+                const form = new FormData();
+                form.append('resume', file);
+                const { data } = await api.post<ResumeUploadResponse>(
+                    '/apply/resume',
+                    form,
+                    { headers: { 'Content-Type': 'multipart/form-data' } }
+                );
+                return data;
+            }
+            catch (error) {
+				throw toError(error, 'Failed to upload resume');
+            }
         },
     });
 };
@@ -74,11 +106,16 @@ export const useCreateApplication = () => {
 
     return useMutation<ApplicationResponse, Error, ApplicationCreate>({
         mutationFn: async (payload: ApplicationCreate) => {
-            const { data } = await api.post<ApplicationResponse>(
-                '/apply',
-                payload
-            );
-            return data;
+            try {
+                const { data } = await api.post<ApplicationResponse>(
+                    '/apply',
+                    payload
+                );
+                return data;
+            }
+            catch (error) {
+				throw toError(error, 'Failed to submit application');
+            }
         },
         onSuccess: () => {
             // invalidate the admin list to trigger refresh
@@ -160,11 +197,16 @@ export const useUpdateApplicationStatus = () => {
         { id: string; status: ApplicationResponse['status'] }
     >({
         mutationFn: async ({ id, status }) => {
-            const { data } = await api.patch<ApplicationResponse>(
-                `/applications/${id}/status`,
-                { status }
-            );
-            return data;
+            try {
+                const { data } = await api.patch<ApplicationResponse>(
+                    `/applications/${id}/status`,
+                    { status }
+                );
+                return data;
+            }
+            catch (error) {
+				throw toError(error, 'Failed to update application status');
+            }
         },
         onSuccess: (updatedApplication) => {
             // update specific record in cache immediately
