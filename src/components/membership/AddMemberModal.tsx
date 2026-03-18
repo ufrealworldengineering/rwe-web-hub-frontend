@@ -1,0 +1,165 @@
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, X } from 'lucide-react';
+import { useAddMember, useTeams } from '../../hooks/useMembers';
+import toast from 'react-hot-toast';
+import { APP_YEAR_LABELS } from '../../types/member';
+import type { AppYear } from '../../types/member';
+
+const YEAR_OPTIONS = Object.entries(APP_YEAR_LABELS) as [AppYear, string][];
+
+const schema = z.object({
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Invalid email address'),
+  team: z.string().uuid('Please select a valid team'),
+  year: z.enum(['first', 'second', 'third', 'fourth', 'other']).optional(),
+});
+
+type FormValues = z.infer<typeof schema>;
+
+interface AddMemberModalProps {
+  onClose: () => void;
+}
+
+const inputClass =
+  'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors';
+
+const errorClass = 'mt-1 text-xs text-red-400';
+
+export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
+  const { mutate: addMember, isPending } = useAddMember();
+  const { data: teams = [] } = useTeams();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  const onSubmit = (data: FormValues) => {
+    addMember(data, {
+      onSuccess: () => {
+        toast.success('Member added successfully!');
+        onClose();
+      },
+      onError: () => {
+        toast.error('Failed to add member. Please try again.');
+      },
+    });
+  };
+
+  return (
+    /* Backdrop */
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      {/* Modal card */}
+      <div className="relative w-full max-w-md rounded-xl border border-white/10 bg-[#2c2c2c] text-white shadow-2xl">
+
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+          <h2 className="text-base font-semibold">Add Member</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center justify-center w-7 h-7 rounded-full text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 space-y-4">
+
+          {/* First + Last name row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/60">First Name</label>
+              <input
+                {...register('first_name')}
+                placeholder="Alice"
+                className={inputClass}
+              />
+              {errors.first_name && <p className={errorClass}>{errors.first_name.message}</p>}
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/60">Last Name</label>
+              <input
+                {...register('last_name')}
+                placeholder="Smith"
+                className={inputClass}
+              />
+              {errors.last_name && <p className={errorClass}>{errors.last_name.message}</p>}
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-white/60">Email</label>
+            <input
+              {...register('email')}
+              placeholder="alice@example.com"
+              type="email"
+              className={inputClass}
+            />
+            {errors.email && <p className={errorClass}>{errors.email.message}</p>}
+          </div>
+
+          {/* Team */}
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-white/60">Team</label>
+            <select
+              {...register('team')}
+              className={`${inputClass} cursor-pointer`}
+            >
+              <option value="" className="bg-[#2c2c2c]">Select a team...</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id} className="bg-[#2c2c2c]">
+                  {team.name}
+                </option>
+              ))}
+            </select>
+            {errors.team && <p className={errorClass}>{errors.team.message}</p>}
+          </div>
+
+          {/* Year */}
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-white/60">Year</label>
+            <select
+              {...register('year')}
+              className={`${inputClass} cursor-pointer`}
+            >
+              <option value="" className="bg-[#2c2c2c]">Select a year...</option>
+              {YEAR_OPTIONS.map(([value, label]) => (
+                <option key={value} value={value} className="bg-[#2c2c2c]">{label}</option>
+              ))}
+            </select>
+            {errors.year && <p className={errorClass}>{errors.year.message}</p>}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-white hover:bg-secondary/80 disabled:opacity-50 transition-colors"
+            >
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {isPending ? 'Adding…' : 'Add Member'}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  );
+};
