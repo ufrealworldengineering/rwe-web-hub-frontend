@@ -58,26 +58,40 @@
 	--accent-foreground: var(--color-foreground-primary);
 }
 
+:root {
+	--hero-line-height: 2.5rem;
+}
+@media (min-width: 640px) {
+	:root {
+		--hero-line-height: 3rem;
+	}
+}
+@media (min-width: 1024px) {
+	:root {
+		--hero-line-height: 3.75rem; /* h-15 / text-6xl lg */
+	}
+}
+
 @keyframes hero-text-animation {
 
 	0%,
 	20% {
-		top: 0;
+		transform: translateY(0);
 	}
 
 	25%,
 	45% {
-		top: -60px;
+		transform: translateY(calc(-1 * var(--hero-line-height)));
 	}
 
 	50%,
 	70% {
-		top: -120px;
+		transform: translateY(calc(-2 * var(--hero-line-height)));
 	}
 
 	75%,
 	100% {
-		top: -180px;
+		transform: translateY(calc(-3 * var(--hero-line-height)));
 	}
 }
 
