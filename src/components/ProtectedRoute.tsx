@@ -7,7 +7,7 @@ export type UserRole = 'Guest' | 'Admin';
 // TODO: this function simply returns dummy data to demonstrate functionality.
 //       should be replaced with a real AuthStore that returns the user's state using JWT
 const useAuthStore = () => {
-    // return { isAuthenticated: true, user: { role: 'Guest' as UserRole } }
+    return { isAuthenticated: true, user: { role: 'Guest' as UserRole } }
     return { isAuthenticated: true, user: { role: 'Admin' as UserRole } }
 };
 
