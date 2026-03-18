@@ -10,7 +10,7 @@ import { droneSteps } from '@/components/form-stepper/Teams/Drone/steps';
 import { webSteps } from '@/components/form-stepper/Teams/Web/steps';
 import { ebikeSteps } from '@/components/form-stepper/Teams/EBike/steps';
 import { armSteps } from '@/components/form-stepper/Teams/RobotArm/steps';
-import { useSubmitApplication } from '@/api/hooks/useApplication';
+import { useSubmitApplication } from '@/api/hooks/useApplications';
 
 // Fields shared across all applications (Step1Default + Step2Default)
 type ApplicationFormValues = {
