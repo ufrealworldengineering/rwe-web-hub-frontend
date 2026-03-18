@@ -5,11 +5,25 @@ import {
   getPaginationRowModel,
   flexRender,
   createColumnHelper,
+  type FilterFn,
 } from '@tanstack/react-table';
 import { useState, useMemo } from 'react';
 import { Search, ChevronUp, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Member, AppYear } from '../../types/member';
 import { APP_YEAR_LABELS } from '../../types/member';
+
+const memberSearchFilter: FilterFn<Member> = (row, _columnId, filterValue: string) => {
+  const q = filterValue.toLowerCase();
+  const { first_name, last_name, email, team_rel, year } = row.original;
+  return (
+    first_name?.toLowerCase().includes(q) ||
+    last_name?.toLowerCase().includes(q) ||
+    `${first_name} ${last_name}`.toLowerCase().includes(q) ||
+    email?.toLowerCase().includes(q) ||
+    team_rel?.name?.toLowerCase().includes(q) ||
+    (year ? APP_YEAR_LABELS[year].toLowerCase().includes(q) : false)
+  );
+};
 
 const columnHelper = createColumnHelper<Member>();
 
@@ -19,7 +33,7 @@ const Badge = ({ label }: { label: string }) => (
   </span>
 );
 
-const NA = () => <span className="text-white/50">N/A</span>;
+const NA = () => <span className="text-muted-foreground">N/A</span>;
 
 const columns = [
   columnHelper.display({
@@ -50,7 +64,7 @@ const columns = [
   }),
   columnHelper.accessor('email', {
     header: 'Email',
-    cell: (info) => <span className="text-white/70">{info.getValue()}</span>,
+    cell: (info) => <span className="text-muted-foreground">{info.getValue()}</span>,
   }),
   columnHelper.display({
     id: 'program_manager',
@@ -92,6 +106,7 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
     columns,
     state: { globalFilter },
     onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: memberSearchFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -99,25 +114,25 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
   });
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[#2c2c2c] text-white overflow-hidden">
+    <div className="rounded-xl border border-border bg-card text-card-foreground overflow-hidden">
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2 p-4 border-b border-white/10 flex-wrap">
+      <div className="flex items-center gap-2 p-4 border-b border-border flex-wrap">
 
         {/* Search */}
-        <label className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm text-white/60 flex-1 min-w-48 max-w-xs">
+        <label className="flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm text-muted-foreground flex-1 min-w-48 max-w-xs">
           <Search className="h-4 w-4 shrink-0" />
           <input
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder="Search for a member..."
-            className="bg-transparent outline-none w-full placeholder:text-white/40 text-white"
+            className="bg-transparent outline-none w-full placeholder:text-muted-foreground text-foreground"
           />
         </label>
 
         {/* Team filter */}
-        <div className="relative flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-2 text-sm cursor-pointer text-white">
-          <ChevronUp className="h-4 w-4 text-white/60 shrink-0 pointer-events-none" />
+        <div className="relative flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-sm cursor-pointer text-foreground">
+          <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 pointer-events-none" />
           <span className="pointer-events-none">{teamFilter || 'All Teams'}</span>
           <select
             value={teamFilter}
@@ -132,8 +147,8 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
         </div>
 
         {/* Year filter */}
-        <div className="relative flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-2 text-sm cursor-pointer text-white">
-          <ChevronUp className="h-4 w-4 text-white/60 shrink-0 pointer-events-none" />
+        <div className="relative flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-sm cursor-pointer text-foreground">
+          <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 pointer-events-none" />
           <span className="pointer-events-none">{yearFilter ? APP_YEAR_LABELS[yearFilter] : 'All Years'}</span>
           <select
             value={yearFilter}
@@ -150,7 +165,7 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
         {/* Add Member */}
         <button
           onClick={onAddMember}
-          className="ml-auto flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors"
+          className="ml-auto flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Add Member
@@ -161,11 +176,11 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
       <table className="w-full text-sm">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b border-white/10">
+            <tr key={headerGroup.id} className="border-b border-border">
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-4 py-3 text-left text-xs font-medium text-white/50 uppercase tracking-wide"
+                  className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide"
                 >
                   {flexRender(header.column.columnDef.header, header.getContext())}
                 </th>
@@ -176,7 +191,7 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
         <tbody>
           {table.getRowModel().rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-10 text-center text-white/50">
+              <td colSpan={columns.length} className="px-4 py-10 text-center text-muted-foreground">
                 No members found.
               </td>
             </tr>
@@ -184,7 +199,7 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
             table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-white/10 last:border-0 hover:bg-white/5 transition-colors"
+                className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 py-3">
@@ -198,11 +213,11 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
       </table>
 
       {/* Pagination */}
-      <div className="flex items-center justify-end gap-1 p-4 border-t border-white/10">
+      <div className="flex items-center justify-end gap-1 p-4 border-t border-border">
         <button
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-          className="flex items-center justify-center w-8 h-8 rounded-full border border-white/10 text-white disabled:opacity-30 hover:bg-white/10 transition-colors"
+          className="flex items-center justify-center w-8 h-8 rounded-full border border-border text-foreground disabled:opacity-30 hover:bg-muted transition-colors cursor-pointer disabled:cursor-default"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -214,7 +229,7 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
             className={`flex items-center justify-center w-8 h-8 rounded-full border text-sm transition-colors ${
               table.getState().pagination.pageIndex === i
                 ? 'bg-primary border-primary text-primary-foreground'
-                : 'border-white/10 text-white hover:bg-white/10'
+                : 'border-border text-foreground hover:bg-muted cursor-pointer'
             }`}
           >
             {i + 1}
@@ -224,7 +239,7 @@ export const MemberTable = ({ data, onAddMember }: MemberTableProps) => {
         <button
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-          className="flex items-center justify-center w-8 h-8 rounded-full border border-white/10 text-white disabled:opacity-30 hover:bg-white/10 transition-colors"
+          className="flex items-center justify-center w-8 h-8 rounded-full border border-border text-foreground disabled:opacity-30 hover:bg-muted transition-colors cursor-pointer disabled:cursor-default"
         >
           <ChevronRight className="h-4 w-4" />
         </button>

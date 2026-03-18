@@ -5,14 +5,13 @@ import { MemberTable } from '../../components/membership/MemberTable';
 import { AddMemberModal } from '../../components/membership/AddMemberModal';
 import { useMembers } from '../../hooks/useMembers';
 import rweLogo from '../../assets/rwe-logo.svg';
-import './admin.css';
 
 export default function MembershipPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: members = [], isLoading, isError } = useMembers();
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="dark p-6 space-y-4 min-h-screen bg-background text-foreground">
       <Toaster position="top-right" />
 
       <div className="flex items-center justify-between">

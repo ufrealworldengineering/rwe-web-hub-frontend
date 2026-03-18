@@ -24,7 +24,7 @@ interface AddMemberModalProps {
 }
 
 const inputClass =
-  'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors';
+  'w-full rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-ring/50 transition-colors';
 
 const errorClass = 'mt-1 text-xs text-red-400';
 
@@ -56,15 +56,15 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Modal card */}
-      <div className="relative w-full max-w-md rounded-xl border border-white/10 bg-[#2c2c2c] text-white shadow-2xl">
+      <div className="relative w-full max-w-md rounded-xl border border-border bg-card text-card-foreground shadow-2xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h2 className="text-base font-semibold">Add Member</h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center justify-center w-7 h-7 rounded-full text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+            className="flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -76,7 +76,7 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
           {/* First + Last name row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">First Name</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">First Name</label>
               <input
                 {...register('first_name')}
                 placeholder="Alice"
@@ -85,7 +85,7 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
               {errors.first_name && <p className={errorClass}>{errors.first_name.message}</p>}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">Last Name</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Last Name</label>
               <input
                 {...register('last_name')}
                 placeholder="Smith"
@@ -97,7 +97,7 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
 
           {/* Email */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/60">Email</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Email</label>
             <input
               {...register('email')}
               placeholder="alice@example.com"
@@ -109,14 +109,14 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
 
           {/* Team */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/60">Team</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Team</label>
             <select
               {...register('team')}
               className={`${inputClass} cursor-pointer`}
             >
-              <option value="" className="bg-[#2c2c2c]">Select a team...</option>
+              <option value="" className="bg-card">Select a team...</option>
               {teams.map((team) => (
-                <option key={team.id} value={team.id} className="bg-[#2c2c2c]">
+                <option key={team.id} value={team.id} className="bg-card">
                   {team.name}
                 </option>
               ))}
@@ -126,14 +126,14 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
 
           {/* Year */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-white/60">Year</label>
+            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Year</label>
             <select
               {...register('year')}
               className={`${inputClass} cursor-pointer`}
             >
-              <option value="" className="bg-[#2c2c2c]">Select a year...</option>
+              <option value="" className="bg-card">Select a year...</option>
               {YEAR_OPTIONS.map(([value, label]) => (
-                <option key={value} value={value} className="bg-[#2c2c2c]">{label}</option>
+                <option key={value} value={value} className="bg-card">{label}</option>
               ))}
             </select>
             {errors.year && <p className={errorClass}>{errors.year.message}</p>}
@@ -144,14 +144,14 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-white hover:bg-secondary/80 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50 transition-colors"
             >
               {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {isPending ? 'Adding…' : 'Add Member'}
