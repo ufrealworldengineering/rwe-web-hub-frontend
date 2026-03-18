@@ -33,7 +33,7 @@ const Footer = () => {
             <div className="flex flex-col items-center gap-2 mt-1">
                 <div className="flex space-x-4">
                     <Link
-                        to='https://www.instagram.com/realworldengineering?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=='
+                        to='https://www.instagram.com/realworldengineering'
                         rel='noopener noreferrer'
                         target='_blank'
                     >
@@ -42,7 +42,7 @@ const Footer = () => {
                         />
                     </Link>
                     <Link
-                        to='https://www.instagram.com/realworldengineering?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=='
+                        to='https://www.instagram.com/realworldengineering'
                         rel='noopener noreferrer'
                         target='_blank'
                     >
