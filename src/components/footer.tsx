@@ -1,6 +1,17 @@
 import rwe_logo from '@/assets/rwe-logo-notext.svg';
 import { Mail, Linkedin, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '@/lib/theme-context';
+import { Moon, Sun } from 'lucide-react';
+
+const ThemeToggle = () => {
+    const { theme, toggleTheme } = useTheme();
+    return (
+        <button onClick={toggleTheme} className='cursor-pointer mt-1 text-muted-foreground'>
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        </button>
+    );
+};
 
 const Footer = () => {
     return (
@@ -50,7 +61,8 @@ const Footer = () => {
                     </Link>
                 </div>
             </div>
-        </footer >
+            <ThemeToggle />
+        </footer>
     );
 };
 
