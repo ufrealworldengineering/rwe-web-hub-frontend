@@ -1,14 +1,8 @@
 import React from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
+import { useAuthStore } from '@/api/store/authStore';
 
-
-export type UserRole = 'Guest' | 'Admin';
-
-// TODO: this function simply returns dummy data to demonstrate functionality.
-//       should be replaced with a real AuthStore that returns the user's state using JWT
-const useAuthStore = () => {
-    return { isAuthenticated: true, user: { role: 'Admin' as UserRole } }
-};
+export type UserRole = 'president' | 'treasurer' | 'program_manager' | 'member' | 'Admin' | 'Guest';
 
 type ProtectedRouteProps = {
     children: React.ReactNode;
@@ -19,14 +13,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     children,
     allowedRoles
 }) => {
-    const { isAuthenticated, user } = useAuthStore();
+    const { isAuthenticated, role } = useAuthStore();
     const location = useLocation();
 
     if (!isAuthenticated) {
         return <Navigate to='/login' state={{ from: location }} replace />;
     }
 
-    if (allowedRoles && !allowedRoles.includes(user.role)) {
+    if (allowedRoles && role && !allowedRoles.includes(role as UserRole)) {
         return <Navigate to='/access-denied' replace />;
     }
 

@@ -1,5 +1,3 @@
-"use client";
-
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
@@ -85,7 +83,7 @@ function Carousel({
     (index: number) => {
       if (index === api?.selectedScrollSnap()) return;
       const autoplay = api?.plugins()?.autoplay;
-      autoplay?.reset();
+      (autoplay as any)?.reset();
       api?.scrollTo(index);
     },
     [api]

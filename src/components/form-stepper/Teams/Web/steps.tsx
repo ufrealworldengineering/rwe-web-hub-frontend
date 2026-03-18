@@ -5,7 +5,7 @@ import {
     RadioGroupItem,
 } from '@/components/ui/radio-group';
 import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
-import { ChevronsLeftRightEllipsis } from 'lucide-react';
+import { Globe } from 'lucide-react';
 
 // NOTE: These are the SWE STEPS, meaning they are the served only if SWE team is selected
 
@@ -49,7 +49,7 @@ export const Step1SWE = () => {
 export const webSteps: FormStepDefinition[] = [
     {
         id: 'details',
-        label: { icon: ChevronsLeftRightEllipsis, label: 'Software Team', subcontent: 'Team application details' },
+        label: { icon: Globe, label: 'Software Team', subcontent: 'Team application details' },
         Component: Step1SWE
     }
 ];
