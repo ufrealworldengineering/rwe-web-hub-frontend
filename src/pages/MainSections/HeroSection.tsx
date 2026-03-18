@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import logo from '@/assets/rwe-logo-notext.svg';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
 	return (
@@ -18,12 +19,25 @@ const HeroSection = () => {
 					</div>
 				</div>
 				<div className='w-fit flex flex-row justify-center gap-4'>
-					<Button className='bg-accent text-background border-2 box-border duration-300 border-accent hover:text-accent hover:bg-background font-sans font-semibold '>
-						Join Discord
-					</Button>
-					<Button className='bg-transparent text-accent border-accent duration-300 hover:text-background hover:bg-accent border-2 font-sans font-semibold'>
-						Check-In
-					</Button>
+					<Link
+						to='https://discord.com/invite/b2v2gFxBdt'
+						rel='noopener noreferrer'
+						target='_blank'
+					>
+						<Button
+							className='bg-accent text-background border-2 box-border duration-300 border-accent hover:text-accent cursor-pointer hover:bg-background font-sans font-semibold'
+						>
+							Join Discord
+						</Button>
+					</Link>
+					<Link
+						to='applications'
+						rel='noopener noreferrer'
+					>
+						<Button className='bg-transparent text-accent border-accent duration-300 hover:text-background cursor-pointer hover:bg-accent border-2 font-sans font-semibold'>
+							Apply
+						</Button>
+					</Link>
 				</div>
 				<ChevronDown className='text-accent transition-transform animate-bounce ease-in-out duration-1500' />
 			</div>
