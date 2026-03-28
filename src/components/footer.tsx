@@ -1,29 +1,39 @@
 import rwe_logo from '@/assets/rwe-logo-notext.svg';
 import { Mail, Linkedin, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '@/lib/theme-context';
+import { Moon, Sun } from 'lucide-react';
+
+const ThemeToggle = () => {
+    const { theme, toggleTheme } = useTheme();
+    return (
+        <button onClick={toggleTheme} className='cursor-pointer mt-1 text-muted-foreground'>
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        </button>
+    );
+};
 
 const Footer = () => {
     return (
-        <footer className="mt-auto py-5 flex flex-col items-center">
-            <div className='flex'>
+        <footer className="mt-auto py-5 flex flex-col items-center px-4">
+            <div className='flex items-center gap-1'>
                 <img
                     alt='RWE Logo'
-                    className="self-center w-5 float-left mr-1"
+                    className="w-5"
                     src={rwe_logo}
-
                 />
-                <p className="text-lg text-muted-foreground">
+                <p className="text-base sm:text-lg text-muted-foreground">
                     Real World Engineering
                 </p>
             </div>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 University of Florida · Gainesville, FL
             </p>
-            <div className="flex flex-col items-center md:items-end gap-2 mt-1">
+            <div className="flex flex-col items-center gap-2 mt-1">
                 <div className="flex space-x-4">
                     <Link
-                        to='https://www.instagram.com/realworldengineering?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=='
+                        to='https://www.instagram.com/realworldengineering'
                         rel='noopener noreferrer'
                         target='_blank'
                     >
@@ -32,7 +42,7 @@ const Footer = () => {
                         />
                     </Link>
                     <Link
-                        to='https://www.instagram.com/realworldengineering?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=='
+                        to='https://www.instagram.com/realworldengineering'
                         rel='noopener noreferrer'
                         target='_blank'
                     >
@@ -51,7 +61,8 @@ const Footer = () => {
                     </Link>
                 </div>
             </div>
-        </footer >
+            <ThemeToggle />
+        </footer>
     );
 };
 

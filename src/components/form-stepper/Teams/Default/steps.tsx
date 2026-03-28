@@ -21,7 +21,7 @@ export const Step1Default = () => {
     const errors = formState.errors ?? {};
 
     return (
-        <div className='space-y-4'>
+        <div className='space-y-4' id='default_1'>
             <h2 className='text-lg font-medium'>Member Profile</h2>
             <div>
                 <Label htmlFor='full_name'>Full Name</Label>
@@ -52,6 +52,33 @@ export const Step1Default = () => {
                     className='mt-1 bg-background-tertiary'
                 />
                 {errors.major && <p className='text-sm text-red-500'>{String(errors.major?.message)}</p>}
+            </div>
+            <div>
+                <Label>Year</Label>
+                <Controller
+                    control={control}
+                    name='year'
+                    defaultValue='default'
+                    rules={{
+                        validate: value => value !== 'default' || 'Please choose your year'
+                    }}
+                    render={({ field: { value, onChange } }) => (
+                        <Select onValueChange={onChange} value={value}>
+                            <SelectTrigger className='mt-1 bg-background-tertiary'>
+                                <SelectValue placeholder='Choose...' />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value='default'>Choose...</SelectItem>
+                                <SelectItem value='first'>First</SelectItem>
+                                <SelectItem value='second'>Second</SelectItem>
+                                <SelectItem value='third'>Third</SelectItem>
+                                <SelectItem value='fourth'>Fourth</SelectItem>
+                                <SelectItem value='other'>Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    )}
+                />
+                {errors.year && <p className='text-sm text-red-500'>{String(errors.year?.message)}</p>}
             </div>
             <div>
                 <Label>Design Team</Label>
@@ -90,7 +117,7 @@ export const Step2Default = () => {
     const errors = formState.errors ?? {};
 
     return (
-        <div className='space-y-4'>
+        <div className='space-y-4' id='default_2'>
             <h2 className='text-lg font-medium'>Key Information</h2>
             <div>
                 <Label htmlFor='resume'>Please upload your resume</Label>
@@ -99,7 +126,7 @@ export const Step2Default = () => {
                     id='resume'
                     type='file'
                     {...register('resume')}
-                    className='mt-1 bg-background-tertiary py-2' 
+                    className='mt-1 bg-background-tertiary py-2'
                 />
                 {errors.resume && <p className='text-sm text-red-500'>{String(errors.resume?.message)}</p>}
             </div>

@@ -34,12 +34,15 @@ export const FormStepper = ({
     steps, 
     initialStep = 0, 
     onSubmit,
-    form
+    form,
+    disabled = false,
 }: { 
     steps: FormStepDefinition[]; 
     initialStep?: number; 
     onSubmit?: (values: any) => void;
     form?: UseFormReturn<any>;
+    // disables navigation and submission controls (while a request pending/successful)
+    disabled?: boolean;
 }) => {
     // If external form provided, use that one, else generate an internal one.
     // That way `pages/Applications.tsx` can re-render the component while maintaining state for
@@ -109,17 +112,17 @@ export const FormStepper = ({
                         </div>
 
                         <div className='flex justify-between'>
-                            <Button type='button' onClick={goPrev} disabled={curStep === 0} className='btn'>
+                            <Button type='button' onClick={goPrev} disabled={curStep === 0 || disabled} className='btn'>
                                 Back
                             </Button>
                             <div>
                                 {!isLast && (
-                                    <Button type='submit' className='btn-primary'>
+                                    <Button type='submit' disabled={disabled} className='btn-primary'>
                                         Next
                                     </Button>
                                 )}
                                 {isLast && (
-                                    <Button type='submit' className='btn-primary'>
+                                    <Button type='submit' disabled={disabled} className='btn-primary'>
                                         Submit
                                     </Button>
                                 )}
