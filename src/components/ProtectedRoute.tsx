@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/api/store/authStore';
 
-export type UserRole = 'president' | 'treasurer' | 'program_manager' | 'member' | 'Admin' | 'Guest';
+export type UserRole = 'president' | 'treasurer' | 'program_manager' | 'member' | 'Admin';
 
 type ProtectedRouteProps = {
     children: React.ReactNode;
