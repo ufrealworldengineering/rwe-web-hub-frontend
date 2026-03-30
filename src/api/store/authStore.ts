@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    }, body: JSON.stringify({email, password}),
+                    }, body: JSON.stringify({username: email, password}),
                 });
 
                 if (!res.ok) {
