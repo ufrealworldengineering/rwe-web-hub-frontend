@@ -13,7 +13,11 @@ import {
 import { Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import stockHeadshot from '@/assets/headshots/stock-headshot.jpg';
+// import stockHeadshot from '@/assets/headshots/stock-headshot.jpg';
+import AlinaGarib from '@/assets/headshots/AlinaGarib.jpeg';
+import IanTowns from '@/assets/headshots/IanTowns.jpeg';
+import MichaelSmith from '@/assets/headshots/MichealSmith.jpeg';
+import SarveshPalani from '@/assets/headshots/SarveshPalani.jpg';
 
 type BoardMember = {
     name: string;
@@ -27,30 +31,30 @@ const EBoard: BoardMember[] = [
     {
         name: "Sarveshwaran Palani",
         role: "President",
-        imgURL: stockHeadshot,
-        description: "Previous Intern...",
-        linkedin: "brady-carrington"
+        imgURL: SarveshPalani,
+        // description: "Previous Intern...",
+        linkedin: "sarveshwpalani"
     },
     {
         name: "Ian Towns",
         role: "Vice President",
-        imgURL: stockHeadshot,
-        description: "Desc...",
-        linkedin: "brady-carrington"
+        imgURL: IanTowns,
+        // description: "Previous Intern...",
+        linkedin: "ian-towns"
     },
     {
         name: "Michael Smith",
         role: "Treasurer",
-        imgURL: stockHeadshot,
-        description: "Previous @ ",
+        imgURL: MichaelSmith,
+        // description: "Previous Intern...",
         linkedin: "brady-carrington"
     },
     {
-        name: "Michael Smith",
-        role: "Treasurer",
-        imgURL: stockHeadshot,
-        description: "Previous @ ",
-        linkedin: "brady-carrington"
+        name: "Alina Garib",
+        role: "Software Program Manager",
+        imgURL: AlinaGarib,
+        // description: "Previous Intern...",
+        linkedin: "alina-garib"
     },
 ];
 
@@ -89,7 +93,7 @@ const OrgAbout = () => {
                             {selected.role}
                         </p>
                         <p className="text-sm text-center text-background-tertiary mt-2">
-                            {selected.description ?? "—"}
+                            {selected.description ?? ""}
                         </p>
                     </div>
                 </div>

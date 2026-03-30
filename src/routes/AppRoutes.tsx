@@ -24,9 +24,9 @@ const AppRoutes = () => {
                 {/* Placeholder until Dashboard page is built */}
                 <Route path="/dashboard" element={<Navigate to="/" replace />} />
                 <Route path="/admin" element={
-                    <ProtectedRoute allowedRoles={['Admin']}>
+                    // <ProtectedRoute allowedRoles={['Admin']}>
                         <Admin />
-                    </ProtectedRoute>
+                   //  </ProtectedRoute>
                 } />
             </Route>
         </Routes>

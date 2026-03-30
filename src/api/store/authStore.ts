@@ -59,35 +59,42 @@ export const useAuthStore = create<AuthState>()(
             role: null,
              //!!backend doesn't have POST /api/auth/login yet so this will error until its added
             login: async (email: string, password: string) => {
-                const res= await fetch(`${API_Base}/api/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }, body: JSON.stringify({username: email, password}),
-                });
+            // Step 1: get tokens
+            const formBody = new URLSearchParams({ username: email, password });
+            const res = await fetch(`${API_Base}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formBody.toString(),
+            });
 
-                if (!res.ok) {
-                    const error=await res.json().catch(()=>({}));
-                    throw new Error(error.detail ?? 'Login failed');
-                }
+            if (!res.ok) {
+                const error = await res.json().catch(() => ({}));
+                throw new Error(error.detail ?? 'Login failed');
+            }
 
-                const data= await res.json() as { 
-                    access_token: string;
-                    refresh_token: string;
-                    user: User;
+            const data = await res.json() as {
+                access_token: string;
+                refresh_token: string;
+            };
 
-                };
+            // Step 2: fetch user info using the new token
+            const meRes = await fetch(`${API_Base}/api/auth/me`, {
+                headers: { Authorization: `Bearer ${data.access_token}` },
+            });
 
-                set({ 
-                    token: data.access_token,
-                    refreshTokenValue: data.refresh_token,
-                    user: data.user,
-                    role: data.user.role,
-                    isAuthenticated: true,
-                }); 
+            if (!meRes.ok) throw new Error('Failed to fetch user info');
+            const user = await meRes.json() as User;
 
-                scheduleRefresh(data.access_token, get().refreshToken);
-            },
+            set({
+                token: data.access_token,
+                refreshTokenValue: data.refresh_token,
+                user,
+                role: user.role,
+                isAuthenticated: true,
+            });
+
+            scheduleRefresh(data.access_token, get().refreshToken);
+        },
             logout: () => {
                 if (refreshTimeout) clearTimeout(refreshTimeout);
                 set({
@@ -100,39 +107,27 @@ export const useAuthStore = create<AuthState>()(
             }, 
             //!!backend doesn't have POST /api/auth/refresh yet so this will error until its added
             refreshToken: async () => {
-                const {refreshTokenValue} = get();
-                if (!refreshTokenValue) {
-                    get().logout(); 
-                    return;
-                }
+            const { refreshTokenValue } = get();
+            if (!refreshTokenValue) { get().logout(); return; }
 
-                try { 
-                    const res = await fetch(`${API_Base}/api/auth/refresh`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({refresh_token: refreshTokenValue}),
-                    });
+            try {
+                const res = await fetch(`${API_Base}/api/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: refreshTokenValue }),
+                });
 
-                    if (!res.ok) {
-                        get().logout();
-                        return;
-                    }
-                    const data = await res.json() as {
-                        access_token: string;
-                        refresh_token: string;
-                    };
-                    set({
-                        token: data.access_token,
-                        refreshTokenValue: data.refresh_token,
-                    });
-                    scheduleRefresh(data.access_token, get().refreshToken);
-                } catch (error) {
-                    get().logout();
-                }
-                },
+                if (!res.ok) { get().logout(); return; }
 
+                const data = await res.json() as { access_token: string };
+
+                // Keep the existing refresh token — backend doesn't rotate it
+                set({ token: data.access_token });
+                scheduleRefresh(data.access_token, get().refreshToken);
+            } catch {
+                get().logout();
+            }
+        },
         // call this on app mount, picks up any saved session fromm localStroage
         //also rechdules the refresh timer if we have a valid token
             checkAuth: () => {
