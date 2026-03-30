@@ -5,8 +5,9 @@ import {
     MarqueeFade
 } from './ui/shadcn-io/marquee';
 import onshape_logo from '@/assets/onshape-logo-RGB_K-cropped.svg';
+import slice_logo from '@/assets/sliceengineering-logo.png';
 
-const Logos = [onshape_logo];
+const Logos = [onshape_logo, slice_logo];
 
 const LogoMarquee = () => {
     return (
