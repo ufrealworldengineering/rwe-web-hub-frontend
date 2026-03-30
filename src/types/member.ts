@@ -1,11 +1,11 @@
 export type AppYear = 'first' | 'second' | 'third' | 'fourth' | 'other';
 
 export const APP_YEAR_LABELS: Record<AppYear, string> = {
-  first:  '1st Year',
-  second: '2nd Year',
-  third:  '3rd Year',
-  fourth: '4th Year',
-  other:  'Other',
+  first:  'first',
+  second: 'second',
+  third:  'third',
+  fourth: 'fourth',
+  other:  'other',
 };
 
 export interface Member {
