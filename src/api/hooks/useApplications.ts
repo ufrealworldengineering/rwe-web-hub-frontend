@@ -3,6 +3,8 @@ import type { AxiosError } from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api.ts';
 import type {
+    ApplicationCore,
+    ApplicationTeams,
     ApplicationCreate,
     ApplicationFilters,
     ApplicationResponse,
@@ -46,7 +48,7 @@ export const useApplications = (filters?: ApplicationFilters) => {
                 return data;
             }
             catch (error) {
-				throw toError(error, 'Failed to fetch applications');
+                throw toError(error, 'Failed to fetch applications');
             }
         },
         staleTime: 1000 * 60 * 2,  // 2 minutes (cache is fresh)
@@ -67,7 +69,7 @@ export const useApplication = (id: string) => {
                 return data;
             }
             catch (error) {
-				throw toError(error, 'Failed to fetch application');
+                throw toError(error, 'Failed to fetch application');
             }
         },
         enabled: Boolean(id),
@@ -77,7 +79,7 @@ export const useApplication = (id: string) => {
 };
 
 // (CLIENT) UPLOAD RESUME
-// POST /applications/resume
+// POST /applications/apply/resume
 // sends a multipart/form-data POST, returns stored resume URL
 export const useUploadResume = () => {
     return useMutation<ResumeUploadResponse, Error, File>({
@@ -86,14 +88,14 @@ export const useUploadResume = () => {
                 const form = new FormData();
                 form.append('resume', file);
                 const { data } = await api.post<ResumeUploadResponse>(
-                    '/apply/resume',
+                    '/applications/apply/resume',
                     form,
                     { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
                 return data;
             }
             catch (error) {
-				throw toError(error, 'Failed to upload resume');
+                throw toError(error, 'Failed to upload resume');
             }
         },
     });
@@ -107,14 +109,26 @@ export const useCreateApplication = () => {
     return useMutation<ApplicationResponse, Error, ApplicationCreate>({
         mutationFn: async (payload: ApplicationCreate) => {
             try {
+                const form = new FormData();
+                // append all fields as form data
+                Object.entries(payload).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null) {
+                        if (key === 'answers_json' && typeof value === 'object') {
+                            form.append(key, JSON.stringify(value));
+                        } else {
+                            form.append(key, String(value));
+                        }
+                    }
+                });
                 const { data } = await api.post<ApplicationResponse>(
-                    '/apply',
-                    payload
+                    '/applications/apply',
+                    form,
+                    { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
                 return data;
             }
             catch (error) {
-				throw toError(error, 'Failed to submit application');
+                throw toError(error, 'Failed to submit application');
             }
         },
         onSuccess: () => {
@@ -166,11 +180,28 @@ export const useSubmitApplication = (): SubmitState => {
 
             // strip the FileList from the values and attach the URL
             const { resume: _rawFile, ...rest } = values;
+
+            const coreFieldSet = new Set<string>([
+                'first_name', 'last_name', 'email', 'major', 'year', 'team_id',
+                'experience', 'how_heard', 'consent', 'resume_url'
+            ]);
+
+            const core = Object.fromEntries(
+                Object.entries(rest).filter(([key]) => coreFieldSet.has(key))
+            ) as ApplicationCore;
+
+            const answers_json = Object.fromEntries(
+                Object.entries(rest).filter(([key]) => !coreFieldSet.has(key))
+            ) as ApplicationTeams;
+
             const payload: ApplicationCreate = {
-                ...(rest as ApplicationCreate),
-                ...(resume_url ? { resume_url } : {}),
+                ...core,
+                answers_json,
+                ...(resume_url ? { resume_url } : {})
             };
 
+            console.log(payload);
+            
             // submit the application
             await createApplication.mutateAsync(payload);
             setState({ isPending: false, isSuccess: true, isError: false, error: null });
@@ -205,7 +236,7 @@ export const useUpdateApplicationStatus = () => {
                 return data;
             }
             catch (error) {
-				throw toError(error, 'Failed to update application status');
+                throw toError(error, 'Failed to update application status');
             }
         },
         onSuccess: (updatedApplication) => {
