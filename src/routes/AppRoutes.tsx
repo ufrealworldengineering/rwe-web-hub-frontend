@@ -38,7 +38,7 @@ const AppRoutes = () => {
                     <Route path="applications" element={<ApplicationManagementPage />} />
                 </Route>
             </Route>
-            
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 }
