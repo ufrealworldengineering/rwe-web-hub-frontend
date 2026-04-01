@@ -10,6 +10,7 @@ import Admin from '@/pages/admin/Admin';
 import Login from '@/pages/Login';
 import MembershipPage from '@/pages/admin/Membership';
 import ApplicationManagementPage from '@/pages/admin/ApplicationManagement';
+import NotFound from '@/pages/404';
 
 const AppRoutes = () => {
     return (
@@ -37,6 +38,7 @@ const AppRoutes = () => {
                     <Route path="applications" element={<ApplicationManagementPage />} />
                 </Route>
             </Route>
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 }
