@@ -80,7 +80,7 @@ export const ViewResponsesModal = ({ application, onClose }: ViewResponsesModalP
         {/* Header */}
         <div className="flex items-start justify-between border-b border-border px-6 py-4 shrink-0">
           <div>
-            <h2 className="text-base font-semibold">{application.full_name}</h2>
+            <h2 className="text-base font-semibold">{application.first_name} {application.last_name}</h2>
             <p className="text-sm text-muted-foreground mt-0.5">{application.email}</p>
           </div>
           <button
@@ -93,10 +93,10 @@ export const ViewResponsesModal = ({ application, onClose }: ViewResponsesModalP
 
         {/* Meta summary strip */}
         <div className="flex flex-wrap gap-x-6 gap-y-2 px-6 py-3 border-b border-border bg-muted/20 text-xs text-muted-foreground shrink-0">
-          {application.team && (
+          {application.team_id && (
             <span>
               <span className="font-medium text-foreground">Team: </span>
-              {application.team}
+              {application.team_id}
             </span>
           )}
           {application.year && (
