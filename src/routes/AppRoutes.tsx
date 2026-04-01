@@ -8,6 +8,8 @@ import Main from '@/pages/Main';
 import Unauthorized from '@/pages/Unauthorized';
 import Admin from '@/pages/admin/Admin';
 import Login from '@/pages/Login';
+import MembershipPage from '@/pages/admin/Membership';
+import ApplicationManagementPage from '@/pages/admin/ApplicationManagement';
 
 const AppRoutes = () => {
     return (
@@ -35,7 +37,7 @@ const AppRoutes = () => {
                     <Route path="applications" element={<ApplicationManagementPage />} />
                 </Route>
             </Route>
-            <Route path="*" element={<NotFound />} />
+            
         </Routes>
     );
 }
