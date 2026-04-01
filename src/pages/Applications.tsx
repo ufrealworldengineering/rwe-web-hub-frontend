@@ -11,21 +11,7 @@ import { webSteps } from '@/components/form-stepper/Teams/Web/steps';
 import { ebikeSteps } from '@/components/form-stepper/Teams/EBike/steps';
 import { armSteps } from '@/components/form-stepper/Teams/RobotArm/steps';
 import { useSubmitApplication } from '@/api/hooks/useApplications';
-
-// Fields shared across all applications (Step1Default + Step2Default)
-type ApplicationFormValues = {
-    team: string;
-    year: string;
-    full_name: string;
-    email: string;
-    major: string;
-    resume: FileList | undefined;
-    experience: string;
-    how_heard: string;
-    consent: string;
-    // allow additional team-specific fields
-    [key: string]: unknown;
-};
+import type { ApplicationCore } from '@/types/application';
 
 // import all steps from each team to dynamically render steps
 const teamMap: Record<string, FormStepDefinition[]> = {
@@ -37,7 +23,7 @@ const teamMap: Record<string, FormStepDefinition[]> = {
 };
 
 const Applications = () => {
-    const methods = useForm<ApplicationFormValues>({ defaultValues: { team: 'default', year: 'default' } });
+    const methods = useForm<ApplicationCore>({ defaultValues: { team_id: 'default', year: 'default' } });
     const { watch, reset, getValues } = methods;
 
     const [steps, setSteps] = useState<FormStepDefinition[]>([...defaultSteps]);
@@ -45,20 +31,20 @@ const Applications = () => {
     const { submit, isPending, isSuccess, isError, error, reset: resetSubmit } = useSubmitApplication();
 
     // watch 'team' field to detect when selected team changes
-    const selectedTeam = watch('team');
+    const selectedTeam = watch('team_id');
 
     // if <Select>'ed team changes, swap step array to new team
     useEffect(() => {
-        const team = selectedTeam ?? 'default';
+        const team_id = selectedTeam ?? 'default';
         // defaultSteps[0]: initial member profile information, 
         // teamMap[selected]: selected team's application, 
         // defaultSteps[1]: submission 
-        const newSteps = [defaultSteps[0], ...(teamMap[team] ?? []), defaultSteps[1]];
+        const newSteps = [defaultSteps[0], ...(teamMap[team_id] ?? []), defaultSteps[1]];
         setSteps(newSteps);
 
         // preserve Step1Default + Step2Default fields; clear only team-specific fields
-        const { full_name, email, major, year, resume, experience, how_heard, consent } = getValues();
-        reset({ full_name, email, major, year, team, resume, experience, how_heard, consent });
+        const { first_name, last_name, email, major, year, resume, experience, how_heard, consent } = getValues();
+        reset({ first_name, last_name, email, major, year, team_id, resume, experience, how_heard, consent });
         resetSubmit();
     }, [selectedTeam, reset, resetSubmit]);
 
@@ -66,7 +52,7 @@ const Applications = () => {
         // extract the File from RHF's FileList (input type="file" returns a FileList)
         const rawFile = values.resume?.[0];
         const file = rawFile instanceof File ? rawFile : undefined;
-        console.log(values);
+
         submit({ values, file });
     };
 
