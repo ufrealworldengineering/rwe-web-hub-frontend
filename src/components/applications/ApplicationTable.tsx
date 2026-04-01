@@ -38,11 +38,10 @@ const STATUS_STYLES: Record<ApplicationStatus, string> = {
 
 const appSearchFilter: FilterFn<ApplicationResponse> = (row, _columnId, filterValue: string) => {
   const q = filterValue.toLowerCase();
-  const { full_name, email, team, year, major } = row.original;
+  const { first_name, last_name, email, year, major } = row.original;
   return (
-    full_name?.toLowerCase().includes(q) ||
+    `${first_name} ${last_name}`.toLowerCase().includes(q) ||
     email?.toLowerCase().includes(q) ||
-    team?.toLowerCase().includes(q) ||
     year?.toLowerCase().includes(q) ||
     major?.toLowerCase().includes(q)
   );
@@ -97,7 +96,7 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
     setNotifyingId(app.id);
     try {
       await sendNotification(app.id);
-      toast.success(`Notification sent to ${app.full_name}`);
+      toast.success(`Notification sent to ${app.first_name} ${app.last_name}`);
     } catch {
       toast.error('Failed to send notification. Please try again.');
     } finally {
@@ -112,16 +111,16 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
         header: 'Applicant',
         cell: ({ row }) => (
           <div>
-            <div className="font-medium text-foreground">{row.original.full_name}</div>
+            <div className="font-medium text-foreground">{row.original.first_name} {row.original.last_name}</div>
             <div className="text-xs text-muted-foreground">{row.original.email}</div>
           </div>
         ),
       }),
-      columnHelper.accessor('team', {
+      columnHelper.accessor('id', {
         header: 'Team',
         cell: (info) => {
           const team = info.getValue();
-          return team ? <TeamBadge team={team} /> : <NA />;
+          return team ? <TeamBadge team={team as Team} /> : <NA />;
         },
       }),
       columnHelper.accessor('year', {
@@ -192,7 +191,7 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
   const filteredData = useMemo(() => {
     return data
       .filter((a) => !statusFilter || a.status === statusFilter)
-      .filter((a) => !teamFilter || a.team === teamFilter);
+      .filter((a) => !teamFilter || a.team_id === teamFilter);
   }, [data, statusFilter, teamFilter]);
 
   const table = useReactTable({
