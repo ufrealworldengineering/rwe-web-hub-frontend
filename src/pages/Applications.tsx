@@ -22,8 +22,10 @@ const Applications = () => {
     // watch 'team' field to detect when selected team changes
     const selectedTeam = watch('team_id');
 
-    // Fetch team application template when team is selected
-    const { data: templateData, isLoading: isLoadingTemplate } = useTeamApplicationTemplate(selectedTeam ?? '');
+    // Fetch team application template when team is selected (skip if 'default')
+    const { data: templateData, isLoading: isLoadingTemplate } = useTeamApplicationTemplate(
+        selectedTeam && selectedTeam !== 'default' ? selectedTeam : ''
+    );
 
     // Build steps dynamically from template data
     useEffect(() => {
@@ -41,13 +43,13 @@ const Applications = () => {
         if (templateData?.questions) {
             // Create a team-specific step from the questions
             const teamQuestions = templateData.questions;
-            
+
             const teamStep: FormStepDefinition = {
                 id: selectedTeam,
-                label: { 
-                    icon: FileText, 
-                    label: 'Team Questions', 
-                    subcontent: 'Team-specific information' 
+                label: {
+                    icon: FileText,
+                    label: 'Team Questions',
+                    subcontent: 'Team-specific information'
                 },
                 Component: ({ index, form, goNext, goPrev, submit }) => (
                     <DynamicQuestionStep
@@ -97,13 +99,13 @@ const Applications = () => {
                     </div>
 
                     {isSuccess && (
-                        <div className='mb-4 rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-text-primary'>
+                        <div className='mb-4 rounded-md bg-accent/25 border border-background-accent px-4 py-3 text-sm text-text-primary'>
                             Application submitted successfully! We'll be in touch soon.
                         </div>
                     )}
 
                     {isError && (
-                        <div className='mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800'>
+                        <div className='mb-4 rounded-md bg-background-accent-secondary/25 border border-background-accent-secondary px-4 py-3 text-sm text-background-accent-secondary'>
                             {error?.message ?? 'Something went wrong. Please try again.'}
                         </div>
                     )}

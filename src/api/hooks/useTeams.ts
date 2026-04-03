@@ -177,7 +177,7 @@ export const useDeleteTeam = () => {
 
 // (PUBLIC) FETCH TEAM APPLICATION TEMPLATE
 // GET /teams/:teamId/application-template
-export const useTeamApplicationTemplate = (teamId: string) => {
+export const useTeamApplicationTemplate = (teamId: string) => {	
 	return useQuery<{ team_id: string; questions: Question[] }, Error>({
 		queryKey: teamKeys.applicationTemplate(teamId),
 		queryFn: async () => {
