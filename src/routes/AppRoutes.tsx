@@ -8,6 +8,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Unauthorized from '@/pages/Unauthorized';
 import Admin from '@/pages/admin/Admin';
 import Login from '@/pages/Login';
+import TeamManagement from '@/pages/MainSections/TeamManagement';
 
 const AppRoutes = () => {
     return (
@@ -20,13 +21,14 @@ const AppRoutes = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/applications" element={<Applications />} />
+                <Route path="/teams" element={<TeamManagement />} />
                 <Route path="/access-denied" element={<Unauthorized />} />
                 {/* Placeholder until Dashboard page is built */}
-                <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                { <Route path="/dashboard" element={<Navigate to="/" replace />} />}
                 <Route path="/admin" element={
-                    <ProtectedRoute allowedRoles={['Admin']}>
+                     <ProtectedRoute allowedRoles={['Admin']}>
                         <Admin />
-                    </ProtectedRoute>
+                     </ProtectedRoute> 
                 } />
             </Route>
         </Routes>
