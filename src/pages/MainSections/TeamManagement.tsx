@@ -7,7 +7,7 @@ import {
   flexRender,
   createColumnHelper,
 } from '@tanstack/react-table';
-import { Search, Plus, Edit2, ChevronLeft, ChevronRight, X, Users } from 'lucide-react';
+import { Search, Plus, Edit2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface Team {
   id: number;
@@ -66,14 +66,13 @@ export default function TeamManagement() {
     columnHelper.accessor('name', {
       header: 'Team Name',
       cell: (info) => (
-        <div className="flex flex-col">
-          <span className="font-semibold text-foreground tracking-tight">{info.getValue()}</span>
-          <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Internal Squad</span>
-        </div>
+        <span className="font-semibold text-foreground tracking-tight">
+          {info.getValue()}
+        </span>
       ),
     }),
     columnHelper.accessor('members', {
-      header: () => <div className="flex items-center gap-1"><Users size={12}/> Capacity</div>,
+      header: 'Capacity',
       cell: (info) => <span className="font-mono text-muted-foreground tabular-nums">{info.getValue()} Members</span>,
     }),
     columnHelper.accessor('status', {
@@ -90,7 +89,7 @@ export default function TeamManagement() {
       cell: (info) => (
         <StatusBadge 
           label={info.getValue()} 
-          type={info.getValue() === 'Open' ? 'info' : 'info'} // Uses blue for both or customize further
+          type="info"
         />
       ),
     }),
