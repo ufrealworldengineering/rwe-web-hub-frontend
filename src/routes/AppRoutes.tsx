@@ -8,6 +8,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Unauthorized from '@/pages/Unauthorized';
 import Admin from '@/pages/admin/Admin';
 import Login from '@/pages/Login';
+import NotFound from '@/pages/404';
 import TeamManagement from '@/pages/MainSections/TeamManagement';
 
 const AppRoutes = () => {
@@ -31,6 +32,7 @@ const AppRoutes = () => {
                      </ProtectedRoute> 
                 } />
             </Route>
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 }
