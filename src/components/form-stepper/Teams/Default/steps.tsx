@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
-import { useTeams } from '@/api/hooks/useTeams';
+import { usePublicTeamDirectory } from '@/api/hooks/useTeams';
 import { User, FileInput } from 'lucide-react';
 
 // NOTE: These are the DEFAULT STEPS, meaning they are the first step for all applications
@@ -22,7 +22,7 @@ export const Step1Default = () => {
     const errors = formState.errors ?? {};
 
     // Fetch available teams
-    const { data: teams = [] } = useTeams({ active_only: true });
+    const { data: teams = [] } = usePublicTeamDirectory(true);
 
     return (
         <div className='space-y-4' id='default_1'>

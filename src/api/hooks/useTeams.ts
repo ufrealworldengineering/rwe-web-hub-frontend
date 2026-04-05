@@ -42,7 +42,7 @@ const toError = (error: unknown, fallback: string): Error => {
 };
 
 /** Public marketing site — GET /teams/directory (no auth). */
-export const usePublicTeamDirectory = (activeOnly = true) => {
+export const usePublicTeamDirectory = (activeOnly: boolean = true) => {
 	return useQuery<TeamWithProgramResponse[], Error>({
 		queryKey: [...teamKeys.directory(), { active_only: activeOnly }] as const,
 		queryFn: async () => {
