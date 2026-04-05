@@ -8,6 +8,7 @@ import Main from '@/pages/Main';
 import Unauthorized from '@/pages/Unauthorized';
 import Admin from '@/pages/admin/Admin';
 import Login from '@/pages/Login';
+import TeamManagement from '@/pages/MainSections/TeamManagement';
 import MembershipPage from '@/pages/admin/Membership';
 import ApplicationManagementPage from '@/pages/admin/ApplicationManagement';
 import NotFound from '@/pages/404';
@@ -23,6 +24,7 @@ const AppRoutes = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/applications" element={<Applications />} />
+                <Route path="/teams" element={<TeamManagement />} />
                 <Route path="/access-denied" element={<Unauthorized />} />
                 
                
