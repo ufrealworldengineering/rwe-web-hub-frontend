@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api.ts';
 import type {
     ApplicationCore,
-    ApplicationTeams,
     ApplicationCreate,
     ApplicationFilters,
     ApplicationResponse,
@@ -192,7 +191,7 @@ export const useSubmitApplication = (): SubmitState => {
 
             const answers_json = Object.fromEntries(
                 Object.entries(rest).filter(([key]) => !coreFieldSet.has(key))
-            ) as ApplicationTeams;
+            );
 
             const payload: ApplicationCreate = {
                 ...core,

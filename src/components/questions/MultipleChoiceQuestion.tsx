@@ -7,12 +7,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { QuestionType } from './QuestionRenderer';
-
 export type MultipleChoiceQuestion = {
   id: string;
   question: string;
-  type: QuestionType;
+  type: 'multiple_choice';
   options: Array<string>;
   required: boolean
 };

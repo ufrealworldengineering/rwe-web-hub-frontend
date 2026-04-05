@@ -2,12 +2,10 @@ import { useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import type { QuestionType } from './QuestionRenderer';
-
 export type InputQuestion = {
   id: string;
   question: string;
-  type: QuestionType;
+  type: 'input';
   required: boolean;
   placeholder?: string;
 };
