@@ -9,18 +9,11 @@ import {
 } from '@tanstack/react-table';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, Eye, Bell, Loader2 } from 'lucide-react';
-import type { ApplicationResponse, ApplicationStatus, Team } from '../../types/application';
+import type { ApplicationResponse, ApplicationStatus } from '../../types/application';
+import { useTeams } from '@/api/hooks/useTeams';
 import toast from 'react-hot-toast';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
-
-const TEAM_LABELS: Record<Team, string> = {
-  general: 'General',
-  drone: 'Drone',
-  robotarm: 'Robot Arm',
-  ebike: 'E-Bike',
-  web: 'Web',
-};
 
 const STATUS_LABELS: Record<ApplicationStatus, string> = {
   pending: 'Pending',
@@ -59,9 +52,9 @@ const StatusBadge = ({ status }: { status: ApplicationStatus }) => (
   </span>
 );
 
-const TeamBadge = ({ team }: { team: Team }) => (
+const TeamBadge = ({ label }: { label: string }) => (
   <span className="inline-flex items-center rounded-md bg-secondary/20 px-2.5 py-0.5 text-xs font-semibold text-secondary">
-    {TEAM_LABELS[team] ?? team}
+    {label}
   </span>
 );
 
@@ -147,9 +140,27 @@ interface ApplicationTableProps {
 }
 
 export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProps) => {
+  const { data: teams = [] } = useTeams({ active_only: true });
+
+  const teamFilterOptions = useMemo((): [string, string][] => {
+    const map = new Map<string, string>(teams.map((t) => [t.id, t.name]));
+    for (const app of data) {
+      const id = app.team_id;
+      if (id && !map.has(id)) {
+        map.set(id, id);
+      }
+    }
+    return Array.from(map.entries());
+  }, [teams, data]);
+
+  const teamLabel = useMemo(() => {
+    const map = new Map<string, string>(teams.map((t) => [t.id, t.name]));
+    return (teamId: string) => map.get(teamId) ?? teamId;
+  }, [teams]);
+
   const [globalFilter, setGlobalFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | ''>('');
-  const [teamFilter, setTeamFilter] = useState<Team | ''>('');
+  const [teamFilter, setTeamFilter] = useState<string>('');
   const [notifyingId, setNotifyingId] = useState<string | null>(null);
 
   const handleNotify = async (app: ApplicationResponse) => {
@@ -179,8 +190,8 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
       columnHelper.accessor('team_id', {
         header: 'Team',
         cell: (info) => {
-          const team = info.getValue();
-          return team ? <TeamBadge team={team as Team} /> : <NA />;
+          const teamId = info.getValue();
+          return teamId ? <TeamBadge label={teamLabel(teamId)} /> : <NA />;
         },
       }),
       columnHelper.accessor('year', {
@@ -245,7 +256,7 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
         },
       }),
     ],
-    [notifyingId, onViewResponses]
+    [notifyingId, onViewResponses, teamLabel]
   );
 
   const filteredData = useMemo(() => {
@@ -284,10 +295,10 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
         </label>
 
         {/* Team filter */}
-        <Dropdown<Team>
+        <Dropdown<string>
           value={teamFilter}
           onChange={(val) => { setTeamFilter(val); table.setPageIndex(0); }}
-          options={Object.entries(TEAM_LABELS) as [Team, string][]}
+          options={teamFilterOptions}
           placeholder="All Teams"
         />
 
