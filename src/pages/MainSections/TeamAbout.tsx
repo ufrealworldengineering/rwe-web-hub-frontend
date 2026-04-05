@@ -23,25 +23,26 @@ type Team = {
 
 type GlobImageMap = Record<string, string>;
 
-const robotImages = import.meta.glob('/public/robot/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
+/** Relative to this file → `public/<folder>/`. Avoid `/public/...` globs (Vite warns; URLs should be `/robot/...` not `/public/robot/...`). */
+const robotImages = import.meta.glob('../../../public/robot/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
     eager: true,
     import: 'default',
     query: '?url',
 }) as GlobImageMap;
 
-const ebikeImages = import.meta.glob('/public/ebike/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
+const ebikeImages = import.meta.glob('../../../public/ebike/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
     eager: true,
     import: 'default',
     query: '?url',
 }) as GlobImageMap;
 
-const droneImages = import.meta.glob('/public/drone/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
+const droneImages = import.meta.glob('../../../public/drone/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
     eager: true,
     import: 'default',
     query: '?url',
 }) as GlobImageMap;
 
-const smartGlassesImages = import.meta.glob('/public/smart-glasses/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
+const smartGlassesImages = import.meta.glob('../../../public/smart-glasses/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
     eager: true,
     import: 'default',
     query: '?url',

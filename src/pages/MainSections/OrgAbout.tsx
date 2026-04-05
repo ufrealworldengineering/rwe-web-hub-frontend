@@ -16,11 +16,11 @@ import { ImageWithLoader } from "@/components/ui/image-with-loader";
 import { Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// import stockHeadshot from '@/assets/headshots/stock-headshot.jpg';
-import AlinaGarib from '@/assets/headshots/AlinaGarib.jpeg';
-import IanTowns from '@/assets/headshots/IanTowns.jpeg';
-import MichaelSmith from '@/assets/headshots/MichealSmith.jpeg';
-import SarveshPalani from '@/assets/headshots/SarveshPalani.jpg';
+/** Public-folder images are not imported — use root URLs (`/headshots/...`). Filenames must match `public/headshots/` exactly (case-sensitive on Linux). */
+const ALINA_HEADSHOT = '/headshots/AlinaGarib.JPEG';
+const IAN_HEADSHOT = '/headshots/IanTowns.jpeg';
+const MICHAEL_HEADSHOT = '/headshots/MichealSmith.jpeg';
+const SARVESH_HEADSHOT = '/headshots/SarveshPalani.JPG';
 
 type BoardMember = {
     name: string;
@@ -34,28 +34,28 @@ const EBoard: BoardMember[] = [
     {
         name: "Sarveshwaran Palani",
         role: "President",
-        imgURL: SarveshPalani,
+        imgURL: SARVESH_HEADSHOT,
         // description: "Previous Intern...",
         linkedin: "sarveshwpalani"
     },
     {
         name: "Ian Towns",
         role: "Vice President",
-        imgURL: IanTowns,
+        imgURL: IAN_HEADSHOT,
         // description: "Previous Intern...",
         linkedin: "ian-towns"
     },
     {
         name: "Michael Smith",
         role: "Treasurer",
-        imgURL: MichaelSmith,
+        imgURL: MICHAEL_HEADSHOT,
         // description: "Previous Intern...",
         linkedin: "brady-carrington"
     },
     {
         name: "Alina Garib",
         role: "Software Program Manager",
-        imgURL: AlinaGarib,
+        imgURL: ALINA_HEADSHOT,
         // description: "Previous Intern...",
         linkedin: "alina-garib"
     },
