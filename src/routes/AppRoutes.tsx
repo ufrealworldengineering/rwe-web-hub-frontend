@@ -1,13 +1,28 @@
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import About from '@/pages/MainSections/TeamAbout';
-import Sponsors from '@/pages/MainSections/Sponsors';
 import Applications from '@/pages/Applications';
 import Main from '@/pages/Main';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Unauthorized from '@/pages/Unauthorized';
-import Admin from '@/pages/admin/Admin';
 import Login from '@/pages/Login';
+import AdminLayout from '../pages/admin/AdminLayout';
+import MembershipPage from '@/pages/admin/Membership';
+import AdminHome from '../pages/admin/AdminHome';
+
+const bypassEnabled = import.meta.env.DEV && import.meta.env.VITE_AUTH_BYPASS_ENABLED === 'true';
+const bypassRules = (import.meta.env.VITE_AUTH_BYPASS_ROUTES ?? '')
+    .split(',')
+    .map((item: string) => item.trim())
+    .filter(Boolean);
+
+const matchesBypassRule = (routePath: string): boolean =>
+    bypassEnabled &&
+    bypassRules.some((rule: string) =>
+        rule === `${routePath}/*` ||
+        rule.endsWith('/*')
+            ? routePath.startsWith(rule.slice(0, -1))
+            : routePath === rule
+    );
 
 const AppRoutes = () => {
     return (
@@ -17,17 +32,22 @@ const AppRoutes = () => {
 
             <Route element={<Layout />}>
                 <Route path="/" element={<Main />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/applications" element={<Applications />} />
                 <Route path="/access-denied" element={<Unauthorized />} />
-                {/* Placeholder until Dashboard page is built */}
-                <Route path="/dashboard" element={<Navigate to="/" replace />} />
-                <Route path="/admin" element={
-                    // <ProtectedRoute allowedRoles={['Admin']}>
-                        <Admin />
-                   //  </ProtectedRoute>
-                } />
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={['president', 'treasurer']}
+                            bypassAuth={matchesBypassRule('/admin')}
+                        >
+                            <AdminLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route index element={<AdminHome />} />
+                    <Route path="membership" element={<MembershipPage />} />
+                </Route>
             </Route>
         </Routes>
     );

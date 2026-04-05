@@ -39,7 +39,7 @@ function scheduleRefresh(token:string, refreshFn: () => Promise<void>) {
   try{ 
     const payload = JSON.parse(atob(token.split('.')[1]));
     const expiresAt = payload.exp * 1000; // convert to ms
-    const delay= Math.max(expiresAt - REFRESH_BUFFER_MS, 0);
+    const delay= Math.max(expiresAt - Date.now() - REFRESH_BUFFER_MS, 0);
     refreshTimeout = setTimeout(refreshFn, delay);
 
   } catch(error) {
