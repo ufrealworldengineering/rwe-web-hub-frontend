@@ -24,14 +24,24 @@ export const Step1Default = () => {
         <div className='space-y-4' id='default_1'>
             <h2 className='text-lg font-medium'>Member Profile</h2>
             <div>
-                <Label htmlFor='full_name'>Full Name</Label>
+                <Label htmlFor='first_name'>First Name</Label>
                 <Input
-                    id='full_name'
-                    placeholder='e.g., John Smith'
-                    {...register('full_name', { required: 'Full name is required' })}
+                    id='first_name'
+                    placeholder='e.g., John'
+                    {...register('first_name', { required: 'First name is required' })}
                     className='mt-1 bg-background-tertiary'
                 />
-                {errors.full_name && <p className='text-sm text-red-500'>{String(errors.full_name?.message)}</p>}
+                {errors.first_name && <p className='text-sm text-red-500'>{String(errors.first_name?.message)}</p>}
+            </div>
+            <div>
+                <Label htmlFor='last_name'>Last Name</Label>
+                <Input
+                    id='last_name'
+                    placeholder='e.g., Smith'
+                    {...register('last_name', { required: 'Last name is required' })}
+                    className='mt-1 bg-background-tertiary'
+                />
+                {errors.last_name && <p className='text-sm text-red-500'>{String(errors.last_name?.message)}</p>}
             </div>
             <div>
                 <Label htmlFor='email'>UFL Email</Label>
@@ -84,7 +94,7 @@ export const Step1Default = () => {
                 <Label>Design Team</Label>
                 <Controller
                     control={control}
-                    name='team'
+                    name='team_id'
                     defaultValue='default'
                     rules={{
                         validate: value => value !== 'default' || 'Please choose a team'
@@ -105,7 +115,7 @@ export const Step1Default = () => {
                         </Select>
                     )}
                 />
-                {errors.team && <p className='text-sm text-red-500'>{String(errors.team?.message)}</p>}
+                {errors.team_id && <p className='text-sm text-red-500'>{String(errors.team_id?.message)}</p>}
             </div>
         </div>
     );

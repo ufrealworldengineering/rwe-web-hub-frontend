@@ -4,15 +4,17 @@ export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'waitliste
 
 // core required fields for all applications (regardless of specific team)
 export type ApplicationCore = {
-    full_name: string;
+    first_name: string;
+    last_name: string;
     email: string;
     major: string;
     year: string;
-    team: Team;
+    team_id: Team | 'default';
     experience: string;
     how_heard: string;
     consent: string;
     resume_url?: string;
+    resume?: File;
 };
 
 // TODO: finalize the other application fields (here and in ../Teams/../steps.tsx)
@@ -47,8 +49,11 @@ export type EBikeFields = {
 };
 
 // full submission
-export type ApplicationCreate = ApplicationCore &
-    DroneFields &
+export type ApplicationCreate = ApplicationCore & {
+    answers_json: ApplicationTeams;
+};
+
+export type ApplicationTeams =  DroneFields &
     GeneralFields &
     SWEFields &
     EBikeFields &
