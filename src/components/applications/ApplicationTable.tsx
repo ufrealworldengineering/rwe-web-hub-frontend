@@ -7,8 +7,8 @@ import {
   createColumnHelper,
   type FilterFn,
 } from '@tanstack/react-table';
-import { useState, useMemo } from 'react';
-import { Search, ChevronUp, ChevronLeft, ChevronRight, Eye, Bell, Loader2 } from 'lucide-react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Eye, Bell, Loader2 } from 'lucide-react';
 import type { ApplicationResponse, ApplicationStatus, Team } from '../../types/application';
 import toast from 'react-hot-toast';
 
@@ -67,6 +67,66 @@ const TeamBadge = ({ team }: { team: Team }) => (
 
 const NA = () => <span className="text-muted-foreground">N/A</span>;
 
+// ─── custom dropdown ─────────────────────────────────────────────────────────
+
+interface DropdownProps<T extends string> {
+  value: T | '';
+  onChange: (val: T | '') => void;
+  options: [T, string][];
+  placeholder: string;
+}
+
+function Dropdown<T extends string>({ value, onChange, options, placeholder }: DropdownProps<T>) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const selectedLabel = value ? options.find(([v]) => v === value)?.[1] : placeholder;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+      >
+        <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+        <span>{selectedLabel}</span>
+      </button>
+
+      {open && (
+        <div className="absolute top-full mt-1 left-0 z-50 min-w-36 rounded-lg border border-border bg-card shadow-lg py-1">
+          <button
+            onClick={() => { onChange('' as T | ''); setOpen(false); }}
+            className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted ${
+              value === '' ? 'text-primary font-medium' : 'text-foreground'
+            }`}
+          >
+            {placeholder}
+          </button>
+          {options.map(([val, label]) => (
+            <button
+              key={val}
+              onClick={() => { onChange(val); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted ${
+                value === val ? 'text-primary font-medium' : 'text-foreground'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── notify helper ───────────────────────────────────────────────────────────
 
 async function sendNotification(applicationId: string): Promise<{ success: boolean }> {
@@ -116,7 +176,7 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
           </div>
         ),
       }),
-      columnHelper.accessor('id', {
+      columnHelper.accessor('team_id', {
         header: 'Team',
         cell: (info) => {
           const team = info.getValue();
@@ -224,40 +284,20 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
         </label>
 
         {/* Team filter */}
-        <div className="relative flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-sm cursor-pointer text-foreground">
-          <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 pointer-events-none" />
-          <span className="pointer-events-none">
-            {teamFilter ? TEAM_LABELS[teamFilter] : 'All Teams'}
-          </span>
-          <select
-            value={teamFilter}
-            onChange={(e) => { setTeamFilter(e.target.value as Team | ''); table.setPageIndex(0); }}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          >
-            <option value="">All Teams</option>
-            {(Object.entries(TEAM_LABELS) as [Team, string][]).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-        </div>
+        <Dropdown<Team>
+          value={teamFilter}
+          onChange={(val) => { setTeamFilter(val); table.setPageIndex(0); }}
+          options={Object.entries(TEAM_LABELS) as [Team, string][]}
+          placeholder="All Teams"
+        />
 
         {/* Status filter */}
-        <div className="relative flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-sm cursor-pointer text-foreground">
-          <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 pointer-events-none" />
-          <span className="pointer-events-none">
-            {statusFilter ? STATUS_LABELS[statusFilter] : 'All Statuses'}
-          </span>
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value as ApplicationStatus | ''); table.setPageIndex(0); }}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          >
-            <option value="">All Statuses</option>
-            {(Object.entries(STATUS_LABELS) as [ApplicationStatus, string][]).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-        </div>
+        <Dropdown<ApplicationStatus>
+          value={statusFilter}
+          onChange={(val) => { setStatusFilter(val); table.setPageIndex(0); }}
+          options={Object.entries(STATUS_LABELS) as [ApplicationStatus, string][]}
+          placeholder="All Statuses"
+        />
 
         {/* Result count */}
         <span className="ml-auto text-xs text-muted-foreground">
