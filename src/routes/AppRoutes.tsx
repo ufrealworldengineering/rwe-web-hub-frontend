@@ -8,7 +8,6 @@ import Main from '@/pages/Main';
 import Unauthorized from '@/pages/Unauthorized';
 import Admin from '@/pages/admin/Admin';
 import Login from '@/pages/Login';
-import NotFound from '@/pages/404';
 import TeamManagement from '@/pages/MainSections/TeamManagement';
 import MembershipPage from '@/pages/admin/Membership';
 import ApplicationManagementPage from '@/pages/admin/ApplicationManagement';
