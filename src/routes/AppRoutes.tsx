@@ -4,10 +4,13 @@ import About from '@/pages/MainSections/TeamAbout';
 import Sponsors from '@/pages/MainSections/Sponsors';
 import Applications from '@/pages/Applications';
 import Main from '@/pages/Main';
-import ProtectedRoute from '@/components/ProtectedRoute';
+//import ProtectedRoute from '@/components/ProtectedRoute';
 import Unauthorized from '@/pages/Unauthorized';
 import Admin from '@/pages/admin/Admin';
 import Login from '@/pages/Login';
+import TeamManagement from '@/pages/MainSections/TeamManagement';
+import MembershipPage from '@/pages/admin/Membership';
+import ApplicationManagementPage from '@/pages/admin/ApplicationManagement';
 import NotFound from '@/pages/404';
 
 const AppRoutes = () => {
@@ -21,14 +24,21 @@ const AppRoutes = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/sponsors" element={<Sponsors />} />
                 <Route path="/applications" element={<Applications />} />
+                <Route path="/teams" element={<TeamManagement />} />
                 <Route path="/access-denied" element={<Unauthorized />} />
-                {/* Placeholder until Dashboard page is built */}
+                
+               
                 <Route path="/dashboard" element={<Navigate to="/" replace />} />
-                <Route path="/admin" element={
-                    <ProtectedRoute allowedRoles={['Admin']}>
-                        <Admin />
-                    </ProtectedRoute>
-                } />
+
+                {/* Admin Section — Nested Routes */}
+                <Route 
+                    path="/admin" 
+                    element={<Admin />}
+                >
+                    
+                    <Route path="membership" element={<MembershipPage />} />
+                    <Route path="applications" element={<ApplicationManagementPage />} />
+                </Route>
             </Route>
             <Route path="*" element={<NotFound />} />
         </Routes>
