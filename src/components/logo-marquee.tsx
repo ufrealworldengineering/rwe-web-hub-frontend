@@ -17,15 +17,17 @@ const LogoMarquee = () => {
                 <MarqueeFade side='right' />
                 <MarqueeContent autoFill={true} pauseOnHover={true}>
                     {Logos.map((logo, index) => (
-                        <>
-                            <MarqueeItem className='mx-6 w-48 h-36 flex items-center justify-center' key={index}>
+                        <MarqueeItem className='mx-6 h-36 w-48 flex items-center justify-center' key={index}>
+                            <div className='flex h-full w-full items-center justify-center rounded-lg bg-white p-3 shadow-sm'>
                                 <img
-                                    alt={`logo-${index}`}
-                                    className='max-w-full mxa-h-full py-3.5 object-contain cursor-pointer transition-transform delay-50 duration-300 ease-in-out hover:scale-125'
                                     src={logo}
+                                    alt={`logo-${index}`}
+                                    className='max-h-full max-w-full object-contain cursor-pointer transition-transform delay-50 duration-300 ease-in-out hover:scale-110'
+                                    loading='eager'
+                                    decoding='async'
                                 />
-                            </MarqueeItem>
-                        </>
+                            </div>
+                        </MarqueeItem>
                     ))}
                 </MarqueeContent>
             </Marquee>

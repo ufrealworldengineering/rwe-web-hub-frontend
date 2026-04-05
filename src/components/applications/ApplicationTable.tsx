@@ -7,27 +7,14 @@ import {
   createColumnHelper,
   type FilterFn,
 } from '@tanstack/react-table';
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronDown, ChevronLeft, ChevronRight, Eye, Bell, Loader2 } from 'lucide-react';
-import type { ApplicationResponse, ApplicationStatus } from '../../types/application';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Eye, Bell, Loader2, X, Check } from 'lucide-react';
+import type { ApplicationResponse, ApplicationStatus } from '@/types/application';
+import { applicationTeamId } from '@/types/application';
 import { useTeams } from '@/api/hooks/useTeams';
 import toast from 'react-hot-toast';
-
-// ─── helpers ────────────────────────────────────────────────────────────────
-
-const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  pending: 'Pending',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
-  waitlisted: 'Waitlisted',
-};
-
-const STATUS_STYLES: Record<ApplicationStatus, string> = {
-  pending: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
-  accepted: 'bg-green-500/15 text-green-400 border-green-500/30',
-  rejected: 'bg-red-500/15 text-red-400 border-red-500/30',
-  waitlisted: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-};
+import { ApplicationStatusBadge, STATUS_LABELS } from '@/components/ui/status-badge';
+import { useUpdateApplicationStatus, useNotifyApplicant } from '@/api/hooks/useApplications';
 
 const appSearchFilter: FilterFn<ApplicationResponse> = (row, _columnId, filterValue: string) => {
   const q = filterValue.toLowerCase();
@@ -42,25 +29,13 @@ const appSearchFilter: FilterFn<ApplicationResponse> = (row, _columnId, filterVa
 
 const columnHelper = createColumnHelper<ApplicationResponse>();
 
-// ─── sub-components ──────────────────────────────────────────────────────────
-
-const StatusBadge = ({ status }: { status: ApplicationStatus }) => (
-  <span
-    className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[status]}`}
-  >
-    {STATUS_LABELS[status]}
-  </span>
-);
-
 const TeamBadge = ({ label }: { label: string }) => (
-  <span className="inline-flex items-center rounded-md bg-secondary/20 px-2.5 py-0.5 text-xs font-semibold text-secondary">
+  <span className="inline-flex items-center rounded-md bg-secondary/20 px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
     {label}
   </span>
 );
 
 const NA = () => <span className="text-muted-foreground">N/A</span>;
-
-// ─── custom dropdown ─────────────────────────────────────────────────────────
 
 interface DropdownProps<T extends string> {
   value: T | '';
@@ -86,6 +61,7 @@ function Dropdown<T extends string>({ value, onChange, options, placeholder }: D
   return (
     <div ref={ref} className="relative">
       <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors"
       >
@@ -96,6 +72,7 @@ function Dropdown<T extends string>({ value, onChange, options, placeholder }: D
       {open && (
         <div className="absolute top-full mt-1 left-0 z-50 min-w-36 rounded-lg border border-border bg-card shadow-lg py-1">
           <button
+            type="button"
             onClick={() => { onChange('' as T | ''); setOpen(false); }}
             className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted ${
               value === '' ? 'text-primary font-medium' : 'text-foreground'
@@ -105,6 +82,7 @@ function Dropdown<T extends string>({ value, onChange, options, placeholder }: D
           </button>
           {options.map(([val, label]) => (
             <button
+              type="button"
               key={val}
               onClick={() => { onChange(val); setOpen(false); }}
               className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted ${
@@ -120,32 +98,21 @@ function Dropdown<T extends string>({ value, onChange, options, placeholder }: D
   );
 }
 
-// ─── notify helper ───────────────────────────────────────────────────────────
-
-async function sendNotification(applicationId: string): Promise<{ success: boolean }> {
-  const response = await fetch('/api/notify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ application_id: applicationId }),
-  });
-  if (!response.ok) throw new Error('Notify request failed');
-  return response.json();
-}
-
-// ─── table component ─────────────────────────────────────────────────────────
-
 interface ApplicationTableProps {
   data: ApplicationResponse[];
   onViewResponses: (app: ApplicationResponse) => void;
 }
 
 export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProps) => {
-  const { data: teams = [] } = useTeams({ active_only: true });
+  /** Include inactive teams so team names resolve (not raw UUIDs). */
+  const { data: teams = [] } = useTeams({ active_only: false });
+  const updateStatus = useUpdateApplicationStatus();
+  const notifyApplicant = useNotifyApplicant();
 
   const teamFilterOptions = useMemo((): [string, string][] => {
     const map = new Map<string, string>(teams.map((t) => [t.id, t.name]));
     for (const app of data) {
-      const id = app.team_id;
+      const id = applicationTeamId(app);
       if (id && !map.has(id)) {
         map.set(id, id);
       }
@@ -162,18 +129,38 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | ''>('');
   const [teamFilter, setTeamFilter] = useState<string>('');
   const [notifyingId, setNotifyingId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [notifyConfirmApp, setNotifyConfirmApp] = useState<ApplicationResponse | null>(null);
 
-  const handleNotify = async (app: ApplicationResponse) => {
-    setNotifyingId(app.id);
+  const runNotify = useCallback(
+    async (app: ApplicationResponse) => {
+      setNotifyingId(app.id);
+      try {
+        await notifyApplicant.mutateAsync(app.id);
+        toast.success(`Notification sent to ${app.first_name} ${app.last_name}`);
+        setNotifyConfirmApp(null);
+      } catch {
+        toast.error(
+          'Failed to send notification. Applicant must be accepted or denied, or SMTP may be misconfigured.'
+        );
+      } finally {
+        setNotifyingId(null);
+      }
+    },
+    [notifyApplicant]
+  );
+
+  const handleStatusChange = useCallback(async (app: ApplicationResponse, status: ApplicationStatus) => {
+    setUpdatingId(app.id);
     try {
-      await sendNotification(app.id);
-      toast.success(`Notification sent to ${app.first_name} ${app.last_name}`);
+      await updateStatus.mutateAsync({ id: app.id, status, send_email: false });
+      toast.success('Status updated');
     } catch {
-      toast.error('Failed to send notification. Please try again.');
+      toast.error('Failed to update status');
     } finally {
-      setNotifyingId(null);
+      setUpdatingId(null);
     }
-  };
+  }, [updateStatus]);
 
   const columns = useMemo(
     () => [
@@ -187,10 +174,11 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
           </div>
         ),
       }),
-      columnHelper.accessor('team_id', {
+      columnHelper.display({
+        id: 'team',
         header: 'Team',
-        cell: (info) => {
-          const teamId = info.getValue();
+        cell: ({ row }) => {
+          const teamId = applicationTeamId(row.original);
           return teamId ? <TeamBadge label={teamLabel(teamId)} /> : <NA />;
         },
       }),
@@ -206,21 +194,23 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
       }),
       columnHelper.accessor('status', {
         header: 'Status',
-        cell: (info) => <StatusBadge status={info.getValue()} />,
-      }),
-      columnHelper.accessor('submitted_at', {
-        header: 'Submitted',
-        cell: (info) => {
-          const val = info.getValue();
-          if (!val) return <NA />;
+        cell: ({ row }) => {
+          const app = row.original;
+          const busy = updatingId === app.id;
           return (
-            <span className="text-muted-foreground text-xs">
-              {new Date(val).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </span>
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+              <ApplicationStatusBadge status={app.status} />
+              <select
+                value={app.status}
+                disabled={busy}
+                onChange={(e) => void handleStatusChange(app, e.target.value as ApplicationStatus)}
+                className="max-w-[10rem] rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+              >
+                {(Object.keys(STATUS_LABELS) as ApplicationStatus[]).map((s) => (
+                  <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                ))}
+              </select>
+            </div>
           );
         },
       }),
@@ -230,9 +220,12 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
         cell: ({ row }) => {
           const app = row.original;
           const isNotifying = notifyingId === app.id;
+          const terminal = app.status === 'accepted' || app.status === 'denied';
+          const alreadyNotified = terminal && app.notified;
           return (
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => onViewResponses(app)}
                 className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
@@ -240,29 +233,43 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
                 View
               </button>
               <button
-                onClick={() => handleNotify(app)}
-                disabled={isNotifying}
-                className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-foreground hover:bg-muted transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-default"
+                type="button"
+                onClick={() => setNotifyConfirmApp(app)}
+                disabled={isNotifying || !terminal || alreadyNotified}
+                title={
+                  !terminal
+                    ? 'Set status to Accepted or Denied before notifying'
+                    : alreadyNotified
+                      ? 'This decision has been emailed. Change status to notify again.'
+                      : 'Send decision email to the applicant'
+                }
+                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                  alreadyNotified
+                    ? 'border-border bg-muted/40 text-muted-foreground'
+                    : 'border-border text-foreground hover:bg-muted'
+                }`}
               >
                 {isNotifying ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : alreadyNotified ? (
+                  <Check className="h-3.5 w-3.5" />
                 ) : (
                   <Bell className="h-3.5 w-3.5" />
                 )}
-                Notify
+                {alreadyNotified ? 'Notified' : 'Notify'}
               </button>
             </div>
           );
         },
       }),
     ],
-    [notifyingId, onViewResponses, teamLabel]
+    [notifyingId, updatingId, onViewResponses, teamLabel, handleStatusChange]
   );
 
   const filteredData = useMemo(() => {
     return data
       .filter((a) => !statusFilter || a.status === statusFilter)
-      .filter((a) => !teamFilter || a.team_id === teamFilter);
+      .filter((a) => !teamFilter || applicationTeamId(a) === teamFilter);
   }, [data, statusFilter, teamFilter]);
 
   const table = useReactTable({
@@ -277,13 +284,67 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
     initialState: { pagination: { pageSize: 10 } },
   });
 
+  const confirmApp = notifyConfirmApp;
+  const confirmBusy = confirmApp && notifyingId === confirmApp.id;
+
   return (
     <div className="rounded-xl border border-border bg-card text-card-foreground overflow-hidden">
 
-      {/* Toolbar */}
+      {confirmApp && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !confirmBusy) setNotifyConfirmApp(null);
+          }}
+        >
+          <div className="relative w-full max-w-md rounded-xl border border-border bg-card text-card-foreground shadow-2xl p-6">
+            <div className="flex items-start justify-between gap-4">
+              <h2 className="text-base font-semibold pr-6">Send decision email?</h2>
+              <button
+                type="button"
+                disabled={Boolean(confirmBusy)}
+                onClick={() => setNotifyConfirmApp(null)}
+                className="flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0 disabled:opacity-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Notify{' '}
+              <span className="font-medium text-foreground">
+                {confirmApp.first_name} {confirmApp.last_name}
+              </span>{' '}
+              ({confirmApp.email}) that their application was{' '}
+              <span className="font-medium text-foreground">
+                {STATUS_LABELS[confirmApp.status]}
+              </span>
+              ?
+            </p>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={Boolean(confirmBusy)}
+                onClick={() => setNotifyConfirmApp(null)}
+                className="rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(confirmBusy)}
+                onClick={() => void runNotify(confirmApp)}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-70"
+              >
+                {confirmBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
+                Notify
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 p-4 border-b border-border flex-wrap">
 
-        {/* Search */}
         <label className="flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm text-muted-foreground flex-1 min-w-48 max-w-xs">
           <Search className="h-4 w-4 shrink-0" />
           <input
@@ -294,7 +355,6 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
           />
         </label>
 
-        {/* Team filter */}
         <Dropdown<string>
           value={teamFilter}
           onChange={(val) => { setTeamFilter(val); table.setPageIndex(0); }}
@@ -302,7 +362,6 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
           placeholder="All Teams"
         />
 
-        {/* Status filter */}
         <Dropdown<ApplicationStatus>
           value={statusFilter}
           onChange={(val) => { setStatusFilter(val); table.setPageIndex(0); }}
@@ -310,14 +369,12 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
           placeholder="All Statuses"
         />
 
-        {/* Result count */}
         <span className="ml-auto text-xs text-muted-foreground">
           {table.getFilteredRowModel().rows.length} result
           {table.getFilteredRowModel().rows.length !== 1 ? 's' : ''}
         </span>
       </div>
 
-      {/* Table */}
       <table className="w-full text-sm">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -347,7 +404,7 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
                 className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3">
+                  <td key={cell.id} className="px-4 py-3 align-top">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -357,9 +414,9 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
         </tbody>
       </table>
 
-      {/* Pagination */}
       <div className="flex items-center justify-end gap-1 p-4 border-t border-border">
         <button
+          type="button"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
           className="flex items-center justify-center w-8 h-8 rounded-full border border-border text-foreground disabled:opacity-30 hover:bg-muted transition-colors cursor-pointer disabled:cursor-default"
@@ -369,6 +426,7 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
 
         {Array.from({ length: table.getPageCount() }, (_, i) => (
           <button
+            type="button"
             key={i}
             onClick={() => table.setPageIndex(i)}
             className={`flex items-center justify-center w-8 h-8 rounded-full border text-sm transition-colors ${
@@ -382,6 +440,7 @@ export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProp
         ))}
 
         <button
+          type="button"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
           className="flex items-center justify-center w-8 h-8 rounded-full border border-border text-foreground disabled:opacity-30 hover:bg-muted transition-colors cursor-pointer disabled:cursor-default"

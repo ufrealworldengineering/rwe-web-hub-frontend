@@ -2,8 +2,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, X } from 'lucide-react';
-import { useAddMember, useTeams } from '../../hooks/useMembers';
+import { useUpdateMember, useTeams } from '../../hooks/useMembers';
 import toast from 'react-hot-toast';
+import type { Member } from '../../types/member';
 
 const schema = z.object({
   first_name: z.string().min(1, 'First name is required'),
@@ -14,7 +15,8 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-interface AddMemberModalProps {
+interface EditMemberModalProps {
+  member: Member;
   onClose: () => void;
 }
 
@@ -23,31 +25,33 @@ const inputClass =
 
 const errorClass = 'mt-1 text-xs text-destructive';
 
-export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
-  const { mutate: addMember, isPending } = useAddMember();
+export const EditMemberModal = ({ member, onClose }: EditMemberModalProps) => {
+  const { mutate: updateMember, isPending } = useUpdateMember();
   const { data: teams = [] } = useTeams();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      first_name: member.first_name,
+      last_name: member.last_name,
+      email: member.email,
+      team: member.team,
+    },
+  });
 
   const onSubmit = (data: FormValues) => {
-    addMember(
-      {
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        team: data.team,
-      },
+    updateMember(
+      { id: member.id, updates: data },
       {
         onSuccess: () => {
-          toast.success('Member added successfully!');
+          toast.success('Member updated');
           onClose();
         },
-        onError: () => {
-          toast.error('Failed to add member. Please try again.');
-        },
+        onError: () => toast.error('Failed to update member'),
       }
     );
   };
@@ -58,9 +62,8 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="relative w-full max-w-md rounded-xl border border-border bg-card text-card-foreground shadow-2xl">
-
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-base font-semibold">Add Member</h2>
+          <h2 className="text-base font-semibold">Edit member</h2>
           <button
             type="button"
             onClick={onClose}
@@ -71,50 +74,31 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5 space-y-4">
-
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">First Name</label>
-              <input
-                {...register('first_name')}
-                placeholder="Alice"
-                className={inputClass}
-              />
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">First name</label>
+              <input {...register('first_name')} className={inputClass} />
               {errors.first_name && <p className={errorClass}>{errors.first_name.message}</p>}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Last Name</label>
-              <input
-                {...register('last_name')}
-                placeholder="Smith"
-                className={inputClass}
-              />
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Last name</label>
+              <input {...register('last_name')} className={inputClass} />
               {errors.last_name && <p className={errorClass}>{errors.last_name.message}</p>}
             </div>
           </div>
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Email</label>
-            <input
-              {...register('email')}
-              placeholder="alice@example.com"
-              type="email"
-              className={inputClass}
-            />
+            <input {...register('email')} type="email" className={inputClass} />
             {errors.email && <p className={errorClass}>{errors.email.message}</p>}
           </div>
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Team</label>
-            <select
-              {...register('team')}
-              className={`${inputClass} cursor-pointer`}
-            >
-              <option value="" className="bg-card">Select a team...</option>
+            <select {...register('team')} className={`${inputClass} cursor-pointer`}>
+              <option value="">Select a team…</option>
               {teams.map((team) => (
-                <option key={team.id} value={team.id} className="bg-card">
-                  {team.name}
-                </option>
+                <option key={team.id} value={team.id}>{team.name}</option>
               ))}
             </select>
             {errors.team && <p className={errorClass}>{errors.team.message}</p>}
@@ -131,13 +115,12 @@ export const AddMemberModal = ({ onClose }: AddMemberModalProps) => {
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {isPending ? 'Adding…' : 'Add Member'}
+              {isPending ? 'Saving…' : 'Save changes'}
             </button>
           </div>
-
         </form>
       </div>
     </div>

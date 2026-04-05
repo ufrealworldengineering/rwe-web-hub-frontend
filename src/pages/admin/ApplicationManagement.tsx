@@ -12,7 +12,7 @@ export default function ApplicationManagementPage() {
   const { data: applications = [], isLoading, isError } = useApplications();
 
   return (
-    <div className="dark p-6 space-y-4 min-h-screen bg-background text-foreground">
+    <div className="p-6 space-y-4 min-h-screen bg-background text-foreground">
       <Toaster position="top-right" />
 
       <div className="flex items-center justify-between">

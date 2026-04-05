@@ -1,6 +1,7 @@
-export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'waitlisted';
+/** Matches backend `AppStatus` */
+export type ApplicationStatus = 'applied' | 'accepted' | 'denied' | 'in_review';
 
-// core required fields for all applications (regardless of specific team)
+/** Core fields collected in the multi-step apply form (client-side names). */
 export type ApplicationCore = {
     first_name: string;
     last_name: string;
@@ -11,30 +12,46 @@ export type ApplicationCore = {
     experience: string;
     how_heard: string;
     consent: string;
-    resume_url: string;
-    resume: File;
+    resume_url?: string;
+    resume?: FileList | File;
 };
 
-// full submission
-export type ApplicationCreate = ApplicationCore & {
-    answers_json: any;
+/** Payload built for multipart POST /applications/apply */
+export type ApplicationCreate = Omit<ApplicationCore, 'resume' | 'team_id'> & {
+    team_id: string;
+    answers_json: Record<string, unknown>;
+    resume_url?: string;
 };
 
-export type ApplicationResponse = ApplicationCreate & {
+/** Matches backend `ApplicationResponse` + JSON serialization */
+export type ApplicationResponse = {
     id: string;
+    team: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    year: string;
+    major: string;
+    resume: string | null;
     status: ApplicationStatus;
-    submitted_at: string;
+    notified: boolean;
+    metadata_json: Record<string, unknown> | null;
 };
 
-// filters
 export type ApplicationFilters = {
-    team?: string;
+    team_id?: string;
     status?: ApplicationStatus;
     email?: string;
     page?: number;
     limit?: number;
+    notified?: boolean;
 };
 
 export type ResumeUploadResponse = {
     resume_url: string;
 };
+
+/** UUID of the team an application belongs to */
+export function applicationTeamId(app: ApplicationResponse): string {
+    return app.team;
+}

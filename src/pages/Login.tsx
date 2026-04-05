@@ -1,23 +1,43 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/api/store/authStore';
+import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ImageWithLoader } from '@/components/ui/image-with-loader';
+import { useUIStore } from '@/store/uiStore';
+import { getApiOrigin } from '@/lib/api-base';
 import rweLogoNoText from '@/assets/rwe-logo-notext.svg';
 
-type Step = 'email' | 'password' | 'claim' | 'success';
+type Step = 'email' | 'password' | 'createPassword' | 'success';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+const API_BASE = getApiOrigin();
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+type AccountStatusResponse = {
+  exists: boolean;
+  can_set_password: boolean;
+};
+
+async function apiAccountStatus(email: string): Promise<AccountStatusResponse> {
+  const encodedEmail = encodeURIComponent(email.trim());
+  const res = await fetch(`${API_BASE}/api/auth/account-status?email=${encodedEmail}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw { status: res.status, data };
+  return {
+    exists: Boolean(data.exists),
+    can_set_password: Boolean(data.can_set_password),
+  };
+}
+
 async function apiRegister(
   email: string,
   password: string
-): Promise<{ access_token: string; refresh_token: string }> {
+): Promise<void> {
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -25,20 +45,26 @@ async function apiRegister(
   });
   const data = await res.json();
   if (!res.ok) throw { status: res.status, data };
-  return data;
 }
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuthStore();
+  const { theme, setTheme } = useUIStore();
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
-  const from: string = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/dashboard';
+  /** Where to go after a successful login. Default is admin; `/dashboard` in routes also redirects to `/admin`. */
+  const from: string =
+    (location.state as { from?: { pathname?: string } })?.from?.pathname ?? '/admin';
 
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -49,13 +75,21 @@ export default function Login() {
   };
 
   // ── Step 1: Email → Continue ───
-  function handleEmailContinue() {
+  async function handleEmailContinue() {
     if (!isValidEmail(email)) {
       setFieldErrors({ email: 'Enter a valid email address.' });
       return;
     }
     clearErrors();
-    setStep('password');
+    setLoading(true);
+    try {
+      const status = await apiAccountStatus(email);
+      setStep(status.exists ? 'password' : 'createPassword');
+    } catch {
+      setError('Unable to verify account right now. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   // ── Step 2: Login ─────
@@ -74,8 +108,7 @@ export default function Login() {
       if (message.includes('401') || message.toLowerCase().includes('invalid') || message.toLowerCase().includes('login failed')) {
         setError('Invalid credentials.');
       } else {
-        // No account found — try claim flow
-        setStep('claim');
+        setError('Unable to sign in right now. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -96,8 +129,9 @@ export default function Login() {
     setLoading(true);
     try {
       await apiRegister(email, password);
+      await login(email, password);
       setStep('success');
-      setTimeout(() => navigate('/dashboard', { replace: true }), 1800);
+      setTimeout(() => navigate('/admin', { replace: true }), 1200);
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
       if (status === 403) setError('Email not invited. Contact Admin.');
@@ -110,14 +144,29 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background-primary px-4">
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="fixed top-4 right-4 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-foreground backdrop-blur-sm hover:bg-muted transition-colors cursor-pointer"
+        aria-label="Toggle theme"
+        title="Toggle light/dark mode"
+      >
+        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+      </button>
+
       {/* Logo */}
       <div className="mb-8 flex flex-col items-center gap-3">
-        <img src={rweLogoNoText} alt="RWE Logo" className="h-14 w-auto" />
-        <h1 className="font-serif text-2xl text-text-primary tracking-tight">RWE Hub</h1>
+        <ImageWithLoader
+          src={rweLogoNoText}
+          alt="RWE Logo"
+          wrapperClassName="h-20 w-auto"
+          className="h-20 w-auto"
+          loading="eager"
+        />
       </div>
 
       {/* Card */}
-      <div className="w-full max-w-sm bg-background-secondary rounded-xl border border-background-tertiary shadow-sm p-8">
+      <div className="w-full max-w-md bg-background-secondary rounded-xl border border-background-tertiary shadow-sm p-10">
 
         {/* ── SUCCESS ── */}
         {step === 'success' && (
@@ -128,7 +177,7 @@ export default function Login() {
               </svg>
             </div>
             <div className="text-center">
-              <h2 className="font-serif text-xl text-text-primary">Account activated!</h2>
+              <h2 className="text-xl text-text-primary">Account activated!</h2>
               <p className="mt-1 text-sm text-foreground-secondary">Redirecting you to the dashboard…</p>
             </div>
           </div>
@@ -138,7 +187,7 @@ export default function Login() {
         {step === 'email' && (
           <>
             <div className="mb-6">
-              <h2 className="font-serif text-xl text-text-primary">Sign in</h2>
+              <h2 className="text-xl text-text-primary">Sign in</h2>
               <p className="mt-1 text-sm text-foreground-secondary">Enter your email to continue.</p>
             </div>
 
@@ -164,7 +213,7 @@ export default function Login() {
               </div>
 
               <Button className="w-full" onClick={handleEmailContinue}>
-                Continue
+                {loading ? <Spinner /> : 'Continue'}
               </Button>
             </div>
           </>
@@ -176,7 +225,7 @@ export default function Login() {
             <BackButton onClick={() => { setStep('email'); clearErrors(); setPassword(''); }} />
 
             <div className="mb-4">
-              <h2 className="font-serif text-xl text-text-primary">Welcome back</h2>
+              <h2 className="text-xl text-text-primary">Welcome back</h2>
               <p className="mt-1 text-sm text-foreground-secondary">Enter your password to sign in.</p>
             </div>
 
@@ -189,17 +238,28 @@ export default function Login() {
                 <Label htmlFor="password" className="text-foreground-secondary text-xs uppercase tracking-wide">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  autoFocus
-                  autoComplete="current-password"
-                  className={fieldErrors.password ? 'border-destructive focus-visible:ring-destructive/30' : ''}
-                  onChange={(e) => { setPassword(e.target.value); clearErrors(); }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    autoFocus
+                    autoComplete="current-password"
+                    className={`pr-10 ${fieldErrors.password ? 'border-destructive focus-visible:ring-destructive/30' : ''}`}
+                    onChange={(e) => { setPassword(e.target.value); clearErrors(); }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex items-center justify-center px-3 text-foreground-tertiary hover:text-foreground-secondary cursor-pointer"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 {fieldErrors.password && <FieldError message={fieldErrors.password} />}
               </div>
 
@@ -207,32 +267,19 @@ export default function Login() {
                 {loading ? <Spinner /> : 'Login'}
               </Button>
 
-              <div className="relative flex items-center gap-3 py-1">
-                <div className="h-px flex-1 bg-background-tertiary" />
-                <span className="text-xs text-foreground-tertiary">or</span>
-                <div className="h-px flex-1 bg-background-tertiary" />
-              </div>
-
-              <Button
-                variant="outline"
-                className="w-full text-foreground-secondary"
-                onClick={() => { clearErrors(); setPassword(''); setStep('claim'); }}
-              >
-                Claim a new account
-              </Button>
             </div>
           </>
         )}
 
-        {/* ── STEP 3: CLAIM (REGISTER) ── */}
-        {step === 'claim' && (
+        {/* ── STEP 3: CREATE PASSWORD (REGISTER) ── */}
+        {step === 'createPassword' && (
           <>
             <BackButton onClick={() => { setStep('email'); clearErrors(); setPassword(''); setConfirmPw(''); }} />
 
             <div className="mb-4">
-              <h2 className="font-serif text-xl text-text-primary">Claim your account</h2>
+              <h2 className="text-xl text-text-primary">Create your account</h2>
               <p className="mt-1 text-sm text-foreground-secondary">
-                Create a password to activate your invitation.
+                Set a password to activate your account.
               </p>
             </div>
 
@@ -245,16 +292,27 @@ export default function Login() {
                 <Label htmlFor="new-password" className="text-foreground-secondary text-xs uppercase tracking-wide">
                   New password
                 </Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  placeholder="Min. 8 characters"
-                  value={password}
-                  autoFocus
-                  autoComplete="new-password"
-                  className={fieldErrors.password ? 'border-destructive focus-visible:ring-destructive/30' : ''}
-                  onChange={(e) => { setPassword(e.target.value); clearErrors(); }}
-                />
+                <div className="relative">
+                  <Input
+                    id="new-password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    placeholder="Min. 8 characters"
+                    value={password}
+                    autoFocus
+                    autoComplete="new-password"
+                    className={`pr-10 ${fieldErrors.password ? 'border-destructive focus-visible:ring-destructive/30' : ''}`}
+                    onChange={(e) => { setPassword(e.target.value); clearErrors(); }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex items-center justify-center px-3 text-foreground-tertiary hover:text-foreground-secondary cursor-pointer"
+                    aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                    title={showNewPassword ? 'Hide new password' : 'Show new password'}
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 {fieldErrors.password && <FieldError message={fieldErrors.password} />}
               </div>
 
@@ -262,16 +320,27 @@ export default function Login() {
                 <Label htmlFor="confirm-password" className="text-foreground-secondary text-xs uppercase tracking-wide">
                   Confirm password
                 </Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPw}
-                  autoComplete="new-password"
-                  className={fieldErrors.confirmPw ? 'border-destructive focus-visible:ring-destructive/30' : ''}
-                  onChange={(e) => { setConfirmPw(e.target.value); clearErrors(); }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={confirmPw}
+                    autoComplete="new-password"
+                    className={`pr-10 ${fieldErrors.confirmPw ? 'border-destructive focus-visible:ring-destructive/30' : ''}`}
+                    onChange={(e) => { setConfirmPw(e.target.value); clearErrors(); }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex items-center justify-center px-3 text-foreground-tertiary hover:text-foreground-secondary cursor-pointer"
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    title={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 {fieldErrors.confirmPw && <FieldError message={fieldErrors.confirmPw} />}
               </div>
 

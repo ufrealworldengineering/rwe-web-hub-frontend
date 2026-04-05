@@ -5,12 +5,13 @@ import axios, {
   type AxiosResponse 
 } from 'axios';
 import { useAuthStore } from './store/authStore';
+import { getApiBasePath } from '@/lib/api-base';
 
 
 interface ApiError {}
 
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  baseURL: getApiBasePath(),
   headers: {
     'Content-Type': 'application/json',
   },

@@ -4,8 +4,11 @@ import {
     Carousel,
     CarouselContent,
     CarouselItem,
-    CarouselDots
+    CarouselDots,
+    CarouselPrevious,
+    CarouselNext
 } from "@/components/ui/carousel"
+import { ImageWithLoader } from "@/components/ui/image-with-loader";
 
 // import Autoplay from "embla-carousel-autoplay";
 // import useEmblaCarousel from "embla-carousel-react";
@@ -13,7 +16,11 @@ import {
 import { Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import stockHeadshot from '@/assets/headshots/stock-headshot.jpg';
+/** Public-folder images are not imported — use root URLs (`/headshots/...`). Filenames must match `public/headshots/` exactly (case-sensitive on Linux). */
+const ALINA_HEADSHOT = '/headshots/AlinaGarib.JPEG';
+const IAN_HEADSHOT = '/headshots/IanTowns.jpeg';
+const MICHAEL_HEADSHOT = '/headshots/MichealSmith.jpeg';
+const SARVESH_HEADSHOT = '/headshots/SarveshPalani.JPG';
 
 type BoardMember = {
     name: string;
@@ -27,30 +34,30 @@ const EBoard: BoardMember[] = [
     {
         name: "Sarveshwaran Palani",
         role: "President",
-        imgURL: stockHeadshot,
-        description: "Previous Intern...",
-        linkedin: "brady-carrington"
+        imgURL: SARVESH_HEADSHOT,
+        // description: "Previous Intern...",
+        linkedin: "sarveshwpalani"
     },
     {
         name: "Ian Towns",
         role: "Vice President",
-        imgURL: stockHeadshot,
-        description: "Desc...",
-        linkedin: "brady-carrington"
+        imgURL: IAN_HEADSHOT,
+        // description: "Previous Intern...",
+        linkedin: "ian-towns"
     },
     {
         name: "Michael Smith",
         role: "Treasurer",
-        imgURL: stockHeadshot,
-        description: "Previous @ ",
+        imgURL: MICHAEL_HEADSHOT,
+        // description: "Previous Intern...",
         linkedin: "brady-carrington"
     },
     {
-        name: "Michael Smith",
-        role: "Treasurer",
-        imgURL: stockHeadshot,
-        description: "Previous @ ",
-        linkedin: "brady-carrington"
+        name: "Alina Garib",
+        role: "Software Program Manager",
+        imgURL: ALINA_HEADSHOT,
+        // description: "Previous Intern...",
+        linkedin: "alina-garib"
     },
 ];
 
@@ -77,10 +84,10 @@ const OrgAbout = () => {
     const selected = EBoard[selectedIndex] ?? EBoard[0];
 
     return (
-        <section className="flex flex-col w-full items-center justify-center bg-background-accent py-4">
+        <section className="flex flex-col w-full items-center justify-center bg-gradient-to-b from-background-accent to-background pt-4 pb-10">
             <div className="flex flex-col md:flex-row items-center w-full gap-8 md:gap-12 lg:gap-16 px-6 md:px-16 lg:px-32 py-4">
                 <div className="flex flex-col items-center md:items-start w-full md:w-auto md:shrink-0">
-                    <h1 className="text-center text-3xl md:text-4xl font-bold mb-6 text-foreground-primary">Our Executive Board</h1>
+                    <h1 className="text-center text-3xl md:text-4xl font-bold mb-6 background-primary">Our Executive Board</h1>
                     <div className="flex flex-col gap-2 items-center w-full">
                         <p className="text-center text-2xl md:text-3xl font-bold text-text-secondary">
                             {selected.name}
@@ -89,7 +96,7 @@ const OrgAbout = () => {
                             {selected.role}
                         </p>
                         <p className="text-sm text-center text-background-tertiary mt-2">
-                            {selected.description ?? "—"}
+                            {selected.description ?? ""}
                         </p>
                     </div>
                 </div>
@@ -108,11 +115,11 @@ const OrgAbout = () => {
                                     <div className={`transition-all duration-300 transform ${index === selectedIndex ? 'scale-100 opacity-100' : 'scale-75 md:scale-85 opacity-60 md:opacity-75'}`}>
                                         <Card className="p-3 max-w-xs">
                                             <CardContent className="flex flex-col aspect-[3/4] gap-3 items-center justify-center">
-                                                <div
-                                                    className="rounded-full w-full aspect-square bg-cover bg-center"
-                                                    style={{ backgroundImage: `url(${item.imgURL})` }}
-                                                    role="img"
-                                                    aria-label={`${item.name} headshot`}
+                                                <ImageWithLoader
+                                                    src={item.imgURL}
+                                                    alt={`${item.name} headshot`}
+                                                    wrapperClassName="rounded-full w-full aspect-square overflow-hidden"
+                                                    className="h-full w-full object-cover"
                                                 />
                                                 <p className="font-bold text-lg text-text-secondary text-center">
                                                     {item.name}
@@ -134,7 +141,9 @@ const OrgAbout = () => {
                                 </CarouselItem>
                             ))}
                         </CarouselContent>
-                        <CarouselDots ringClass="border-background-accent-secondary" activeClass="bg-background-accent-secondary" />
+                        <CarouselPrevious className="left-2 md:-left-10 bg-background/80 border-border cursor-pointer enabled:cursor-pointer" />
+                        <CarouselNext className="right-2 md:-right-10 bg-background/80 border-border cursor-pointer enabled:cursor-pointer" />
+                        <CarouselDots ringClass="border-primary" activeClass="bg-primary" />
                     </Carousel>
                 </div>
             </div>
