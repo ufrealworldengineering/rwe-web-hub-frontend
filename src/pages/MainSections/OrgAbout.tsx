@@ -111,9 +111,8 @@ const OrgAbout = () => {
                         <CarouselContent className="py-8 -mx-2 md:-mx-3">
                             {EBoard.map((item, index) => (
                                 <CarouselItem key={index} className="basis-full sm:basis-1/2 md:basis-5/12 px-2 md:px-3">
-                                    {/* TODO: not centered in mobile view... not sure why */}
-                                    <div className={`transition-all duration-300 transform ${index === selectedIndex ? 'scale-100 opacity-100' : 'scale-75 md:scale-85 opacity-60 md:opacity-75'}`}>
-                                        <Card className="p-3 max-w-xs">
+                                    <div className={`flex w-full h-full justify-center transition-all duration-300 transform ${index === selectedIndex ? 'scale-100 opacity-100' : 'scale-75 md:scale-85 opacity-60 md:opacity-75'}`}>
+                                        <Card className="p-3 w-full max-w-xs">
                                             <CardContent className="flex flex-col aspect-[3/4] gap-3 items-center justify-center">
                                                 <ImageWithLoader
                                                     src={item.imgURL}
