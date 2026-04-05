@@ -3,10 +3,11 @@ import logo from '@/assets/rwe-logo-notext.svg';
 import { Button } from '@/components/ui/button';
 import { ImageWithLoader } from '@/components/ui/image-with-loader';
 import { Link } from 'react-router-dom';
-import { useTheme } from '@/lib/theme-context';
+import { useUIStore } from '@/store/uiStore';
 
 const HeroSection = () => {
-	const { theme, toggleTheme } = useTheme();
+	const { theme, setTheme } = useUIStore();
+	const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
 	return (
 		<main className='flex flex-col md:flex-row w-full min-h-screen bg-background-primary justify-center'>
@@ -23,7 +24,7 @@ const HeroSection = () => {
 					</Button>
 				</Link>
 				<Link
-					to='applications'
+					to='/applications'
 					rel='noopener noreferrer'
 				>
 					<Button className='bg-transparent text-accent border-accent duration-300 hover:text-background cursor-pointer hover:bg-accent border-2 font-sans font-semibold'>

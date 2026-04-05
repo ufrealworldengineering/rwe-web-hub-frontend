@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { getApiOrigin } from '@/lib/api-base';
 
 
 //the four roles that exist in backend
@@ -26,7 +27,7 @@ interface AuthState {
     checkAuth: () => void;
 }
 
-const API_Base = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+const API_Base = getApiOrigin();
 
 //refresh 5 min before expiration so the user doesn't get kicked mid session 
 const REFRESH_BUFFER_MS=5 * 60 * 1000;

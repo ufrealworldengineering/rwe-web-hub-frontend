@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ImageWithLoader } from '@/components/ui/image-with-loader';
-import { useTheme } from '@/lib/theme-context';
+import { useUIStore } from '@/store/uiStore';
+import { getApiOrigin } from '@/lib/api-base';
 import rweLogoNoText from '@/assets/rwe-logo-notext.svg';
 
 type Step = 'email' | 'password' | 'createPassword' | 'success';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+const API_BASE = getApiOrigin();
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -50,9 +51,12 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuthStore();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useUIStore();
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
-  const from: string = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/dashboard';
+  /** Where to go after a successful login. Default is admin; `/dashboard` in routes also redirects to `/admin`. */
+  const from: string =
+    (location.state as { from?: { pathname?: string } })?.from?.pathname ?? '/admin';
 
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');

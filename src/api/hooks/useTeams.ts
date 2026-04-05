@@ -22,6 +22,7 @@ const teamKeys = {
 		[...teamKeys.all, 'program', programId, filters ?? {}] as const,
 	applicationTemplate: (teamId: string) =>
 		[...teamKeys.all, 'applicationTemplate', teamId] as const,
+	directory: () => [...teamKeys.all, 'directory'] as const,
 };
 
 const toError = (error: unknown, fallback: string): Error => {
@@ -38,6 +39,24 @@ const toError = (error: unknown, fallback: string): Error => {
 	}
 
 	return new Error(fallback);
+};
+
+/** Public marketing site — GET /teams/directory (no auth). */
+export const usePublicTeamDirectory = (activeOnly = true) => {
+	return useQuery<TeamWithProgramResponse[], Error>({
+		queryKey: [...teamKeys.directory(), { active_only: activeOnly }] as const,
+		queryFn: async () => {
+			try {
+				const { data } = await api.get<TeamWithProgramResponse[]>('/teams/directory', {
+					params: { active_only: activeOnly },
+				});
+				return data;
+			} catch (error) {
+				throw toError(error, 'Failed to load teams');
+			}
+		},
+		staleTime: 1000 * 60 * 5,
+	});
 };
 
 // (ADMIN) FETCH ALL / FILTERED TEAMS

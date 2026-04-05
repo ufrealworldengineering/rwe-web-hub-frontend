@@ -1,48 +1,20 @@
 import { X, FileText, ExternalLink } from 'lucide-react';
-import type { ApplicationResponse } from '../../types/application';
+import type { ApplicationResponse } from '@/types/application';
+import { applicationTeamId } from '@/types/application';
+import { useTeams } from '@/api/hooks/useTeams';
 
-// Fields that are "core" metadata shown in the header summary — not repeated in the answers body
-const CORE_FIELDS = new Set([
-  'id',
-  'status',
-  'submitted_at',
-  'full_name',
-  'email',
-  'major',
-  'year',
-  'team',
-  'resume_url',
-  'consent',
+const META_KEYS = new Set([
+  'answers',
 ]);
 
-// Human-readable labels for known answer keys
-const FIELD_LABELS: Record<string, string> = {
-  experience: 'Experience',
-  how_heard: 'How Did You Hear About Us',
-  drone_experience1: 'Drone Experience (Q1)',
-  drone_experience2: 'Drone Experience (Q2)',
-  drone_experience3: 'Drone Experience (Q3)',
-  drone_experience4: 'Drone Experience (Q4)',
-  drone_availability: 'Availability (Drone)',
-  drone_availability_other: 'Availability Detail',
-  onboarding: 'Onboarding Preference',
-  first_choice_team: 'First Choice Team',
-  second_choice_team: 'Second Choice Team',
-  team_choice_explanation: 'Team Choice Explanation',
-  arm_role: 'Robot Arm Role',
-  arm_availability: 'Availability (Robot Arm)',
-  swe_team: 'Software Sub-team',
-  why_join: 'Why Join',
-  background: 'Background',
-};
-
 function formatLabel(key: string): string {
-  return FIELD_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) return '—';
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (typeof value === 'object') return JSON.stringify(value, null, 2);
   return String(value);
 }
 
@@ -52,23 +24,18 @@ interface ViewResponsesModalProps {
 }
 
 export const ViewResponsesModal = ({ application, onClose }: ViewResponsesModalProps) => {
-  // Extract answer fields: everything not in CORE_FIELDS and not null/undefined/empty
-  const answers = Object.entries(application).filter(
-    ([key, value]) =>
-      !CORE_FIELDS.has(key) &&
-      value !== null &&
-      value !== undefined &&
-      value !== ''
-  );
+  const { data: teams = [] } = useTeams({ active_only: false });
+  const teamId = applicationTeamId(application);
+  const teamName = teams.find((t) => t.id === teamId)?.name ?? teamId;
 
-  const submittedDate = application.submitted_at
-    ? new Date(application.submitted_at).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null;
+  const meta = application.metadata_json ?? {};
+  const rawAnswers = meta.answers;
+  const answerEntries: [string, unknown][] =
+    rawAnswers && typeof rawAnswers === 'object' && !Array.isArray(rawAnswers)
+      ? Object.entries(rawAnswers as Record<string, unknown>)
+      : [];
+
+  const otherMeta = Object.entries(meta).filter(([k]) => !META_KEYS.has(k));
 
   return (
     <div
@@ -77,13 +44,13 @@ export const ViewResponsesModal = ({ application, onClose }: ViewResponsesModalP
     >
       <div className="relative w-full max-w-2xl rounded-xl border border-border bg-card text-card-foreground shadow-2xl flex flex-col max-h-[90vh]">
 
-        {/* Header */}
         <div className="flex items-start justify-between border-b border-border px-6 py-4 shrink-0">
           <div>
             <h2 className="text-base font-semibold">{application.first_name} {application.last_name}</h2>
             <p className="text-sm text-muted-foreground mt-0.5">{application.email}</p>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors ml-4 shrink-0"
           >
@@ -91,12 +58,11 @@ export const ViewResponsesModal = ({ application, onClose }: ViewResponsesModalP
           </button>
         </div>
 
-        {/* Meta summary strip */}
         <div className="flex flex-wrap gap-x-6 gap-y-2 px-6 py-3 border-b border-border bg-muted/20 text-xs text-muted-foreground shrink-0">
-          {application.team_id && (
+          {teamId && (
             <span>
               <span className="font-medium text-foreground">Team: </span>
-              {application.team_id}
+              {teamName}
             </span>
           )}
           {application.year && (
@@ -111,21 +77,13 @@ export const ViewResponsesModal = ({ application, onClose }: ViewResponsesModalP
               {application.major}
             </span>
           )}
-          {submittedDate && (
-            <span>
-              <span className="font-medium text-foreground">Submitted: </span>
-              {submittedDate}
-            </span>
-          )}
         </div>
 
-        {/* Scrollable body */}
         <div className="overflow-y-auto px-6 py-5 space-y-4 flex-1">
 
-          {/* Resume link */}
-          {application.resume_url && (
+          {application.resume && (
             <a
-              href={application.resume_url}
+              href={application.resume}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-lg border border-border px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors group"
@@ -136,14 +94,28 @@ export const ViewResponsesModal = ({ application, onClose }: ViewResponsesModalP
             </a>
           )}
 
-          {/* Answer fields */}
-          {answers.length === 0 ? (
+          {otherMeta.length > 0 && (
+            <div className="space-y-3">
+              {otherMeta.map(([key, value]) => (
+                <div key={key}>
+                  <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
+                    {formatLabel(key)}
+                  </dt>
+                  <dd className="text-sm text-foreground bg-muted/30 rounded-lg border border-border px-3 py-2.5 leading-relaxed whitespace-pre-wrap">
+                    {formatValue(value)}
+                  </dd>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {answerEntries.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
               No additional responses recorded.
             </p>
           ) : (
             <div className="space-y-4">
-              {answers.map(([key, value]) => (
+              {answerEntries.map(([key, value]) => (
                 <div key={key}>
                   <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
                     {formatLabel(key)}
@@ -157,9 +129,9 @@ export const ViewResponsesModal = ({ application, onClose }: ViewResponsesModalP
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-end gap-2 border-t border-border px-6 py-4 shrink-0">
           <button
+            type="button"
             onClick={onClose}
             className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >

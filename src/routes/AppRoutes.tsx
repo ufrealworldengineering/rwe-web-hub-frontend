@@ -1,5 +1,5 @@
 import { Route, Routes, Navigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
+import PublicLayout from '@/components/PublicLayout';
 import Applications from '@/pages/Applications';
 import Main from '@/pages/Main';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -9,8 +9,10 @@ import AdminLayout from '../pages/admin/AdminLayout';
 import MembershipPage from '@/pages/admin/Membership';
 import AdminHome from '../pages/admin/AdminHome';
 import ApplicationManagementPage from '@/pages/admin/ApplicationManagement';
+import AdminTeamsPage from '@/pages/admin/TeamManagementPage';
 import TeamManagement from '@/pages/MainSections/TeamManagement';
 import NotFound from '@/pages/404';
+import About from '@/pages/About';
 
 const bypassEnabled = import.meta.env.DEV && import.meta.env.VITE_AUTH_BYPASS_ENABLED === 'true';
 const bypassRules = (import.meta.env.VITE_AUTH_BYPASS_ROUTES ?? '')
@@ -30,31 +32,36 @@ const matchesBypassRule = (routePath: string): boolean =>
 const AppRoutes = () => {
     return (
         <Routes>
-            {/* Auth — outside Layout (no navbar/footer) */}
             <Route path="/login" element={<Login />} />
 
-            <Route element={<Layout />}>
-                <Route path="/" element={<Main />} />
+            {/* Landing only: full-bleed club page — no public header/sidebar (see HeroSection for nav + theme) */}
+            <Route path="/" element={<Main />} />
+
+            <Route element={<PublicLayout />}>
                 <Route path="/applications" element={<Applications />} />
                 <Route path="/teams" element={<TeamManagement />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/access-denied" element={<Unauthorized />} />
-                <Route path="/dashboard" element={<Navigate to="/" replace />} />
-                <Route
-                    path="/admin"
-                    element={
-                        <ProtectedRoute
-                            allowedRoles={['president', 'treasurer']}
-                            bypassAuth={matchesBypassRule('/admin')}
-                        >
-                            <AdminLayout />
-                        </ProtectedRoute>
-                    }
-                >
-                    <Route index element={<AdminHome />} />
-                    <Route path="membership" element={<MembershipPage />} />
-                    <Route path="applications" element={<ApplicationManagementPage />} />
-                </Route>
+                <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
             </Route>
+
+            <Route
+                path="/admin"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={['president', 'treasurer']}
+                        bypassAuth={matchesBypassRule('/admin')}
+                    >
+                        <AdminLayout />
+                    </ProtectedRoute>
+                }
+            >
+                <Route index element={<AdminHome />} />
+                <Route path="membership" element={<MembershipPage />} />
+                <Route path="applications" element={<ApplicationManagementPage />} />
+                <Route path="teams" element={<AdminTeamsPage />} />
+            </Route>
+
             <Route path="*" element={<NotFound />} />
         </Routes>
     );
