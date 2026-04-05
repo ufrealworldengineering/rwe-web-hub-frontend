@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import Applications from '@/pages/Applications';
 import Main from '@/pages/Main';
@@ -8,6 +8,9 @@ import Login from '@/pages/Login';
 import AdminLayout from '../pages/admin/AdminLayout';
 import MembershipPage from '@/pages/admin/Membership';
 import AdminHome from '../pages/admin/AdminHome';
+import ApplicationManagementPage from '@/pages/admin/ApplicationManagement';
+import TeamManagement from '@/pages/MainSections/TeamManagement';
+import NotFound from '@/pages/404';
 
 const bypassEnabled = import.meta.env.DEV && import.meta.env.VITE_AUTH_BYPASS_ENABLED === 'true';
 const bypassRules = (import.meta.env.VITE_AUTH_BYPASS_ROUTES ?? '')
@@ -33,7 +36,9 @@ const AppRoutes = () => {
             <Route element={<Layout />}>
                 <Route path="/" element={<Main />} />
                 <Route path="/applications" element={<Applications />} />
+                <Route path="/teams" element={<TeamManagement />} />
                 <Route path="/access-denied" element={<Unauthorized />} />
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
                 <Route
                     path="/admin"
                     element={
@@ -47,8 +52,10 @@ const AppRoutes = () => {
                 >
                     <Route index element={<AdminHome />} />
                     <Route path="membership" element={<MembershipPage />} />
+                    <Route path="applications" element={<ApplicationManagementPage />} />
                 </Route>
             </Route>
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 }
