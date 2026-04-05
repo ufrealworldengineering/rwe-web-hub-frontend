@@ -104,7 +104,7 @@ interface ApplicationTableProps {
 }
 
 export const ApplicationTable = ({ data, onViewResponses }: ApplicationTableProps) => {
-  /** Include inactive teams so application rows always resolve team names (not raw UUIDs). */
+  /** Include inactive teams so team names resolve (not raw UUIDs). */
   const { data: teams = [] } = useTeams({ active_only: false });
   const updateStatus = useUpdateApplicationStatus();
   const notifyApplicant = useNotifyApplicant();
