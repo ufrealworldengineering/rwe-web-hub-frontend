@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api.ts';
 import type {
     ApplicationCore,
-    ApplicationTeams,
     ApplicationCreate,
     ApplicationFilters,
     ApplicationResponse,
@@ -171,12 +170,12 @@ export const useSubmitApplication = (): SubmitState => {
     const submit = useCallback(async ({ values, file }: SubmitPayload) => {
         setState({ isPending: true, isSuccess: false, isError: false, error: null });
         try {
-            // upload resume if a file was attached
-            let resume_url: string | undefined;
-            if (file) {
-                const uploadResult = await uploadResume.mutateAsync(file);
-                resume_url = uploadResult.resume_url;
+            if (!file) {
+                throw new Error('A PDF resume is required to apply.');
             }
+
+            const uploadResult = await uploadResume.mutateAsync(file);
+            const resume_url = uploadResult.resume_url;
 
             // strip the FileList from the values and attach the URL
             const { resume: _rawFile, ...rest } = values;
@@ -192,16 +191,14 @@ export const useSubmitApplication = (): SubmitState => {
 
             const answers_json = Object.fromEntries(
                 Object.entries(rest).filter(([key]) => !coreFieldSet.has(key))
-            ) as ApplicationTeams;
+            );
 
             const payload: ApplicationCreate = {
                 ...core,
                 answers_json,
-                ...(resume_url ? { resume_url } : {})
+                resume_url,
             };
 
-            console.log(payload);
-            
             // submit the application
             await createApplication.mutateAsync(payload);
             setState({ isPending: false, isSuccess: true, isError: false, error: null });
@@ -225,13 +222,13 @@ export const useUpdateApplicationStatus = () => {
     return useMutation<
         ApplicationResponse,
         Error,
-        { id: string; status: ApplicationResponse['status'] }
+        { id: string; status: ApplicationResponse['status']; send_email?: boolean }
     >({
-        mutationFn: async ({ id, status }) => {
+        mutationFn: async ({ id, status, send_email = false }) => {
             try {
                 const { data } = await api.patch<ApplicationResponse>(
                     `/applications/${id}/status`,
-                    { status }
+                    { status, notified: false, send_email }
                 );
                 return data;
             }
@@ -240,12 +237,33 @@ export const useUpdateApplicationStatus = () => {
             }
         },
         onSuccess: (updatedApplication) => {
-            // update specific record in cache immediately
             queryClient.setQueryData(
                 applicationKeys.detail(updatedApplication.id),
                 updatedApplication
             );
-            // invalidate the filtered list for refetch
+            queryClient.invalidateQueries({ queryKey: applicationKeys.all });
+        },
+    });
+};
+
+/** Explicit resend of decision email (POST /notify, force=True on backend). */
+export const useNotifyApplicant = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<{ success: boolean; application_id: string; notified: boolean }, Error, string>({
+        mutationFn: async (applicationId: string) => {
+            try {
+                const { data } = await api.post<{ success: boolean; application_id: string; notified: boolean }>(
+                    '/notify',
+                    { application_id: applicationId }
+                );
+                return data;
+            }
+            catch (error) {
+                throw toError(error, 'Failed to send notification email');
+            }
+        },
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: applicationKeys.all });
         },
     });

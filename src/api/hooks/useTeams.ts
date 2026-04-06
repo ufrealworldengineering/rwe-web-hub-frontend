@@ -10,6 +10,7 @@ import type {
 	TeamUpdate,
 	TeamWithProgramResponse,
 } from '@/types/team';
+import type { Question } from '@/components/questions/QuestionRenderer';
 
 const teamKeys = {
 	all: ['teams'] as const,
@@ -19,6 +20,9 @@ const teamKeys = {
 		[...teamKeys.all, 'detail', id, filters ?? {}] as const,
 	byProgram: (programId: string, filters?: TeamByProgramFilters) =>
 		[...teamKeys.all, 'program', programId, filters ?? {}] as const,
+	applicationTemplate: (teamId: string) =>
+		[...teamKeys.all, 'applicationTemplate', teamId] as const,
+	directory: () => [...teamKeys.all, 'directory'] as const,
 };
 
 const toError = (error: unknown, fallback: string): Error => {
@@ -35,6 +39,24 @@ const toError = (error: unknown, fallback: string): Error => {
 	}
 
 	return new Error(fallback);
+};
+
+/** Public marketing site — GET /teams/directory (no auth). */
+export const usePublicTeamDirectory = (activeOnly: boolean = true) => {
+	return useQuery<TeamWithProgramResponse[], Error>({
+		queryKey: [...teamKeys.directory(), { active_only: activeOnly }] as const,
+		queryFn: async () => {
+			try {
+				const { data } = await api.get<TeamWithProgramResponse[]>('/teams/directory', {
+					params: { active_only: activeOnly },
+				});
+				return data;
+			} catch (error) {
+				throw toError(error, 'Failed to load teams');
+			}
+		},
+		staleTime: 1000 * 60 * 5,
+	});
 };
 
 // (ADMIN) FETCH ALL / FILTERED TEAMS
@@ -169,6 +191,28 @@ export const useDeleteTeam = () => {
 			queryClient.removeQueries({ queryKey: teamKeys.detail(id) });
 			queryClient.invalidateQueries({ queryKey: teamKeys.all });
 		},
+	});
+};
+
+// (PUBLIC) FETCH TEAM APPLICATION TEMPLATE
+// GET /teams/:teamId/application-template
+export const useTeamApplicationTemplate = (teamId: string) => {	
+	return useQuery<{ team_id: string; questions: Question[] }, Error>({
+		queryKey: teamKeys.applicationTemplate(teamId),
+		queryFn: async () => {
+			try {
+				const { data } = await api.get<{ team_id: string; questions: Question[] }>(
+					`/teams/${teamId}/application-template`
+				);
+				return data;
+			}
+			catch (error) {
+				throw toError(error, 'Failed to fetch application template');
+			}
+		},
+		enabled: Boolean(teamId),
+		staleTime: 1000 * 60 * 5,
+		gcTime: 1000 * 60 * 10,
 	});
 };
 

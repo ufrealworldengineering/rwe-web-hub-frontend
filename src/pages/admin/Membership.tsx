@@ -5,19 +5,29 @@ import { MemberTable } from '../../components/membership/MemberTable';
 import { AddMemberModal } from '../../components/membership/AddMemberModal';
 import { useMembers } from '../../hooks/useMembers';
 import rweLogo from '../../assets/rwe-logo.svg';
+import { PageHeader } from '@/components/admin/PageHeader';
+import { ImageWithLoader } from '@/components/ui/image-with-loader';
 
 export default function MembershipPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: members = [], isLoading, isError } = useMembers();
 
   return (
-    <div className="dark p-6 space-y-4 min-h-screen bg-background text-foreground">
+    <div className="space-y-4 bg-background text-foreground">
       <Toaster position="top-right" />
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Membership</h1>
-        <img src={rweLogo} alt="RWE Logo" className="h-10 w-auto" />
-      </div>
+      <PageHeader
+        title="Membership"
+        rightSlot={
+          <ImageWithLoader
+            src={rweLogo}
+            alt="RWE Logo"
+            wrapperClassName="h-10 w-auto"
+            className="h-10 w-auto"
+            loading="eager"
+          />
+        }
+      />
 
       {isLoading ? (
         <div className="flex justify-center py-8">

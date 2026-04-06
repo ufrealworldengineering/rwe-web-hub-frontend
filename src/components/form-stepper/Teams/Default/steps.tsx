@@ -10,6 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type { FormStepDefinition } from '@/components/form-stepper/formstepper';
+import { usePublicTeamDirectory } from '@/api/hooks/useTeams';
 import { User, FileInput } from 'lucide-react';
 
 // NOTE: These are the DEFAULT STEPS, meaning they are the first step for all applications
@@ -19,6 +20,9 @@ export const Step1Default = () => {
     const methods = useFormContext();
     const { register, formState, control } = methods;
     const errors = formState.errors ?? {};
+
+    // Fetch available teams
+    const { data: teams = [] } = usePublicTeamDirectory(true);
 
     return (
         <div className='space-y-4' id='default_1'>
@@ -31,7 +35,7 @@ export const Step1Default = () => {
                     {...register('first_name', { required: 'First name is required' })}
                     className='mt-1 bg-background-tertiary'
                 />
-                {errors.first_name && <p className='text-sm text-red-500'>{String(errors.first_name?.message)}</p>}
+                {errors.first_name && <p className='text-sm text-background-accent-secondary'>{String(errors.first_name?.message)}</p>}
             </div>
             <div>
                 <Label htmlFor='last_name'>Last Name</Label>
@@ -41,7 +45,7 @@ export const Step1Default = () => {
                     {...register('last_name', { required: 'Last name is required' })}
                     className='mt-1 bg-background-tertiary'
                 />
-                {errors.last_name && <p className='text-sm text-red-500'>{String(errors.last_name?.message)}</p>}
+                {errors.last_name && <p className='text-sm text-background-accent-secondary'>{String(errors.last_name?.message)}</p>}
             </div>
             <div>
                 <Label htmlFor='email'>UFL Email</Label>
@@ -51,7 +55,7 @@ export const Step1Default = () => {
                     {...register('email', { required: 'Email is required', minLength: { value: 3, message: 'At least 3 characters' } })}
                     className='mt-1 bg-background-tertiary'
                 />
-                {errors.email && <p className='text-sm text-red-500'>{String(errors.email?.message)}</p>}
+                {errors.email && <p className='text-sm text-background-accent-secondary'>{String(errors.email?.message)}</p>}
             </div>
             <div>
                 <Label>Major</Label>
@@ -61,7 +65,7 @@ export const Step1Default = () => {
                     {...register('major', { required: 'Major is required' })}
                     className='mt-1 bg-background-tertiary'
                 />
-                {errors.major && <p className='text-sm text-red-500'>{String(errors.major?.message)}</p>}
+                {errors.major && <p className='text-sm text-background-accent-secondary'>{String(errors.major?.message)}</p>}
             </div>
             <div>
                 <Label>Year</Label>
@@ -88,7 +92,7 @@ export const Step1Default = () => {
                         </Select>
                     )}
                 />
-                {errors.year && <p className='text-sm text-red-500'>{String(errors.year?.message)}</p>}
+                {errors.year && <p className='text-sm text-background-accent-secondary'>{String(errors.year?.message)}</p>}
             </div>
             <div>
                 <Label>Design Team</Label>
@@ -106,16 +110,16 @@ export const Step1Default = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value='default'>Choose...</SelectItem>
-                                <SelectItem value='general'>General</SelectItem>
-                                <SelectItem value='drone'>Drone</SelectItem>
-                                <SelectItem value='robotarm'>Robot Arm</SelectItem>
-                                <SelectItem value='ebike'>E-Bike</SelectItem>
-                                <SelectItem value='web'>Web Dev</SelectItem>
+                                {teams.map((team) => (
+                                    <SelectItem key={team.id} value={team.id}>
+                                        {team.name}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     )}
                 />
-                {errors.team_id && <p className='text-sm text-red-500'>{String(errors.team_id?.message)}</p>}
+                {errors.team_id && <p className='text-sm text-background-accent-secondary'>{String(errors.team_id?.message)}</p>}
             </div>
         </div>
     );
@@ -135,10 +139,10 @@ export const Step2Default = () => {
                 <Input
                     id='resume'
                     type='file'
-                    {...register('resume')}
+                    {...register('resume', { required: 'Resume is required' })}
                     className='mt-1 bg-background-tertiary py-2'
                 />
-                {errors.resume && <p className='text-sm text-red-500'>{String(errors.resume?.message)}</p>}
+                {errors.resume && <p className='text-sm text-background-accent-secondary'>{String(errors.resume?.message)}</p>}
             </div>
             <div>
                 <Label htmlFor='experience'>Describe your experiences (past projects, applicable classes, etc.)</Label>
@@ -148,7 +152,7 @@ export const Step2Default = () => {
                     {...register('experience', { required: 'Experience is required', maxLength: { value: 400, message: 'Maximum 400 characters' } })}
                     className='mt-1 bg-background-tertiary'
                 />
-                {errors.experience && <p className='text-sm text-red-500'>{String(errors.experience?.message)}</p>}
+                {errors.experience && <p className='text-sm text-background-accent-secondary'>{String(errors.experience?.message)}</p>}
             </div>
             <div>
                 <Label>How did you hear about us?</Label>
@@ -158,7 +162,7 @@ export const Step2Default = () => {
                     {...register('how_heard', { required: 'Please tell us how you heard about RWE' })}
                     className='mt-1 bg-background-tertiary'
                 />
-                {errors.how_heard && <p className='text-sm text-red-500'>{String(errors.how_heard?.message)}</p>}
+                {errors.how_heard && <p className='text-sm text-background-accent-secondary'>{String(errors.how_heard?.message)}</p>}
             </div>
             <div>
                 <Label>
@@ -174,7 +178,7 @@ export const Step2Default = () => {
                     {...register('consent', { required: 'Type your full, legal name to consent' })}
                     className='mt-1 bg-background-tertiary'
                 />
-                {errors.consent && <p className='text-sm text-red-500'>{String(errors.consent?.message)}</p>}
+                {errors.consent && <p className='text-sm text-background-accent-secondary'>{String(errors.consent?.message)}</p>}
             </div>
         </div>
     );

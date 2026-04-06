@@ -1,26 +1,18 @@
 import rwe_logo from '@/assets/rwe-logo-notext.svg';
 import { Mail, Linkedin, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '@/lib/theme-context';
-import { Moon, Sun } from 'lucide-react';
-
-const ThemeToggle = () => {
-    const { theme, toggleTheme } = useTheme();
-    return (
-        <button onClick={toggleTheme} className='cursor-pointer mt-1 text-muted-foreground'>
-            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-        </button>
-    );
-};
+import { ImageWithLoader } from './ui/image-with-loader';
 
 const Footer = () => {
     return (
         <footer className="mt-auto py-5 flex flex-col items-center px-4">
             <div className='flex items-center gap-1'>
-                <img
-                    alt='RWE Logo'
-                    className="w-5"
+                <ImageWithLoader
                     src={rwe_logo}
+                    alt='RWE Logo'
+                    wrapperClassName='w-5'
+                    className='w-full h-auto'
+                    loading='eager'
                 />
                 <p className="text-base sm:text-lg text-muted-foreground">
                     Real World Engineering
@@ -60,8 +52,13 @@ const Footer = () => {
                         />
                     </Link>
                 </div>
+                <Link
+                    to='/login'
+                    className='mt-1 rounded-md border border-border px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors'
+                >
+                    Admin Login
+                </Link>
             </div>
-            <ThemeToggle />
         </footer>
     );
 };

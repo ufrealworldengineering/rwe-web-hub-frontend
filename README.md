@@ -49,6 +49,22 @@ npm run build
 npm run preview
 ```
 
+## Environment variables
+Create a local `.env` from `.env.example`.
+
+- `VITE_API_BASE_URL`: backend API base URL.
+- `VITE_AUTH_BYPASS_ENABLED`: `true/false`; only applies in dev mode.
+- `VITE_AUTH_BYPASS_ROUTES`: comma-separated route rules for bypass.
+  - exact route: `/admin`
+  - prefix route: `/admin/*`
+
+
+Guidance:
+
+- Keep response minimal (no user profile or role data).
+- Return only what UI needs for branching.
+- Consider rate limiting and generic error responses to reduce account enumeration risk.
+
 ## Project structure (important files)
 .
 └── rwe-web-hub-frontend/

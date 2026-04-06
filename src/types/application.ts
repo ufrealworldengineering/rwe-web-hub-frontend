@@ -1,79 +1,57 @@
-export type Team = 'general' | 'drone' | 'robotarm' | 'ebike' | 'web';
+/** Matches backend `AppStatus` */
+export type ApplicationStatus = 'applied' | 'accepted' | 'denied' | 'in_review';
 
-export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'waitlisted';
-
-// core required fields for all applications (regardless of specific team)
+/** Core fields collected in the multi-step apply form (client-side names). */
 export type ApplicationCore = {
     first_name: string;
     last_name: string;
     email: string;
     major: string;
     year: string;
-    team_id: Team | 'default';
+    team_id: string;
     experience: string;
     how_heard: string;
     consent: string;
     resume_url?: string;
-    resume?: File;
+    resume?: FileList | File;
 };
 
-// TODO: finalize the other application fields (here and in ../Teams/../steps.tsx)
-// team specific fields
-export type DroneFields = {
-    drone_experience1?: string;
-    drone_experience2?: string;
-    drone_experience3?: string;
-    drone_experience4?: string;
-    drone_availability?: 'yes' | 'no' | 'other';
-    drone_availability_other?: string;
+/** Payload built for multipart POST /applications/apply */
+export type ApplicationCreate = Omit<ApplicationCore, 'resume' | 'team_id'> & {
+    team_id: string;
+    answers_json: Record<string, unknown>;
+    resume_url?: string;
 };
 
-export type GeneralFields = {
-    onboarding?: 'yes' | 'no';
-    first_choice_team?: 'drone' | 'robot_arm' | 'ebike' | 'software';
-    second_choice_team?: 'drone' | 'robot_arm' | 'ebike' | 'software';
-    team_choice_explanation?: string;
-};
-
-export type RobotArmFields = {
-    arm_role?: 'mechatronics' | 'payload' | 'controls' | 'project';
-    arm_availability?: 'yes' | 'no';
-};
-
-export type SWEFields = {
-    swe_team: 'web_dev' | 'smart_glasses';
-};
-
-export type EBikeFields = {
-
-};
-
-// full submission
-export type ApplicationCreate = ApplicationCore & {
-    answers_json: ApplicationTeams;
-};
-
-export type ApplicationTeams =  DroneFields &
-    GeneralFields &
-    SWEFields &
-    EBikeFields &
-    RobotArmFields;
-
-export type ApplicationResponse = ApplicationCreate & {
+/** Matches backend `ApplicationResponse` + JSON serialization */
+export type ApplicationResponse = {
     id: string;
+    team: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    year: string;
+    major: string;
+    resume: string | null;
     status: ApplicationStatus;
-    submitted_at: string;
+    notified: boolean;
+    metadata_json: Record<string, unknown> | null;
 };
 
-// filters
 export type ApplicationFilters = {
-    team?: Team;
+    team_id?: string;
     status?: ApplicationStatus;
     email?: string;
     page?: number;
     limit?: number;
+    notified?: boolean;
 };
 
 export type ResumeUploadResponse = {
     resume_url: string;
 };
+
+/** UUID of the team an application belongs to */
+export function applicationTeamId(app: ApplicationResponse): string {
+    return app.team;
+}

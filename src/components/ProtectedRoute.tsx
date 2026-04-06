@@ -1,20 +1,25 @@
 import React from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import { useAuthStore } from '@/api/store/authStore';
+import { useAuthStore, type UserRole } from '@/api/store/authStore';
 
-export type UserRole = 'president' | 'treasurer' | 'program_manager' | 'member' | 'Admin';
 
 type ProtectedRouteProps = {
     children: React.ReactNode;
     allowedRoles?: UserRole[];
+    bypassAuth?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     children,
-    allowedRoles
+    allowedRoles,
+    bypassAuth = false,
 }) => {
     const { isAuthenticated, role } = useAuthStore();
     const location = useLocation();
+
+    if (bypassAuth) {
+        return <>{children}</>;
+    }
 
     if (!isAuthenticated) {
         return <Navigate to='/login' state={{ from: location }} replace />;
